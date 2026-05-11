@@ -1,3 +1,34 @@
+// ส่วนสำหรับรับข้อมูลจากหน้าเว็บ (GitHub)
+function doPost(e) {
+  const params = JSON.parse(e.postData.contents);
+  const action = params.action;
+  let result;
+
+  if (action === 'saveData') {
+    result = saveData(params.type, params.record); 
+  } else if (action === 'deleteData') {
+    result = deleteData(params.type, params.backendId); 
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  const action = e.parameter.action;
+  if (action === 'getAllData') {
+    const data = getAllData(); 
+    return ContentService.createTextOutput(JSON.stringify(data))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ฟังก์ชันเดิมที่คุณมีอยู่แล้ว (ไม่ต้องแก้ข้างใน)
+function getAllData() { /* โค้ดเดิมของคุณ [cite: 412-413] */ }
+function saveData(type, record) { /* โค้ดเดิมของคุณ [cite: 416-421] */ }
+function deleteData(type, backendId) { /* โค้ดเดิมของคุณ [cite: 421-424] */ }
+
+
 function doGet() {
   return HtmlService.createTemplateFromFile('index')
     .evaluate()
