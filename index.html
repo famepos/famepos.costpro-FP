@@ -221,6 +221,7 @@
   </div>
 
   <script>
+    const SCRIPT_URL = "1mVkQ3a4N0fTs0e7-sC9gT_rBl72DQa6RUSnU6O4zUrc";
     
     let allData = [], allIngredients = [], editingId = null, editingIngId = null;
     const UNITS = ["กรัม", "กก.", "มล.", "ลิตร", "ฟอง", "ชิ้น", "อัน", "แพ็ค", "ขวด", "ซอง", "ถุง", "ช้อนชา", "ช้อนโต๊ะ"];
@@ -230,8 +231,19 @@
       document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
     }
 
-    function refreshData() { google.script.run.withSuccessHandler((data) => { allData = data.items || []; allIngredients = data.ingredients || []; renderList(); renderRecipes(); renderIngredientsList(); updateSummaryStats(); }).getAllData(); }
-
+function refreshData() {
+  fetch(`${SCRIPT_URL}?action=getAllData`)
+    .then(res => res.json())
+    .then(data => {
+      allData = data.items || [];
+      allIngredients = data.ingredients || [];
+      renderList(); 
+      renderRecipes(); 
+      renderIngredientsList(); 
+      updateSummaryStats();
+    })
+    .catch(err => console.error("ดึงข้อมูลไม่สำเร็จ:", err));
+}
     function renderList(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
       document.getElementById('itemListTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold">${item.item_name}</td><td><span class="px-2 py-1 bg-slate-100 rounded text-xs opacity-50">${item.category}</span></td><td class="text-blue-500 font-bold">฿${parseFloat(item.total_cost).toFixed(2)}</td><td>฿${parseFloat(item.selling_price).toFixed(2)}</td><td class="text-green-600 font-bold">${item.margin_percent}%</td><td><div class="flex justify-center gap-2"><button onclick="editItem('${item.__backendId}')" class="p-2 bg-green-50 text-green-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="doDelete('${item.__backendId}')" class="p-2 bg-red-50 text-red-500 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join('');
@@ -295,8 +307,23 @@ function showRecipeDetail(id) {
 
     function editIng(id) { const i = allIngredients.find(x => x.__backendId == id); editingIngId = id; document.getElementById('ingName').value = i.name; document.getElementById('ingQty').value = i.quantity; document.getElementById('ingUnit').value = i.unit; document.getElementById('ingPrice').value = (i.price * i.quantity).toFixed(2); document.getElementById('ingFormTitle').textContent = "แก้ไข: " + i.name; document.getElementById('btnAddIng').textContent = "อัปเดต"; document.getElementById('ingFormContainer').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
     function toggleIngForm() { editingIngId = null; document.getElementById('ingName').value = ''; document.getElementById('ingQty').value = ''; document.getElementById('ingPrice').value = ''; document.getElementById('ingFormTitle').textContent = "เพิ่มวัตถุดิบ"; document.getElementById('btnAddIng').textContent = "บันทึก"; document.getElementById('ingFormContainer').classList.toggle('hidden'); }
-    function addNewIngredient() { const n = document.getElementById('ingName').value, q = parseFloat(document.getElementById('ingQty').value), p = parseFloat(document.getElementById('ingPrice').value); if(!n || !q || !p) return showToast('กรอกให้ครบ', '#991b1b'); google.script.run.withSuccessHandler(() => { showToast('สำเร็จ'); toggleIngForm(); refreshData(); }).saveData('ingredient', { __backendId: editingIngId, name: n, quantity: q, price: p/q, unit: document.getElementById('ingUnit').value, category: 'item', created_at: new Date().toISOString() }); }
-function recalcForm() {
+const payload = {
+  action: 'saveData',
+  type: 'ingredient',
+  record: { __backendId: editingIngId, name: n, quantity: q, price: p/q, unit: document.getElementById('ingUnit').value, category: 'item', created_at: new Date().toISOString() }
+};
+
+fetch(SCRIPT_URL, {
+  method: 'POST',
+  body: JSON.stringify(payload)
+})
+.then(res => res.json())
+.then(() => {
+  showToast('สำเร็จ');
+  toggleIngForm();
+  refreshData();
+});
+    function recalcForm() {
       let ingT = 0, extT = 0;
       document.querySelectorAll('.ingredient-row').forEach(r => { 
         ingT += (parseFloat(r.querySelector('input[type="number"]').value) || 0) * (parseFloat(r.querySelector('input[type="hidden"]').value) || 0); 
@@ -345,7 +372,27 @@ function recalcForm() {
       document.querySelectorAll('.ingredient-row').forEach(r => { const s = r.querySelector('select').value; if(s) ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value }); });
       document.querySelectorAll('#extraCostsList > div').forEach(r => { const n = r.querySelector('input[type="text"]').value; if(n) exts.push({ n: n, p: r.querySelector('input[type="number"]').value }); });
       const t = ings.reduce((s, i) => s + (parseFloat(i.q)*parseFloat(i.p)), 0) + exts.reduce((s, e) => s + parseFloat(e.p || 0), 0), sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
-      google.script.run.withSuccessHandler(() => { showToast('สำเร็จ'); refreshData(); switchView('list'); }).saveData('item', { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100).toFixed(1) : 0, created_at: new Date().toISOString() });
+
+      const payload = {
+  action: 'saveData',
+  type: 'item',
+  record: { 
+    __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, 
+    ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, 
+    profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, created_at: new Date().toISOString() 
+  }
+};
+
+fetch(SCRIPT_URL, {
+  method: 'POST',
+  body: JSON.stringify(payload)
+})
+.then(res => res.json())
+.then(() => {
+  showToast('สำเร็จ');
+  refreshData();
+  switchView('list');
+});
     }
 
     function editItem(id) {
@@ -365,8 +412,23 @@ function recalcForm() {
 
     function updateSummaryStats() { document.getElementById('statTotal').textContent = allData.length; const c = allData.reduce((s, i) => s + parseFloat(i.total_cost || 0), 0); document.getElementById('statTotalCost').textContent = '฿' + Math.round(c).toLocaleString(); const m = allData.length ? (allData.reduce((s, i) => s + parseFloat(i.margin_percent || 0), 0) / allData.length).toFixed(1) : 0; document.getElementById('statAvgProfit').textContent = m + '%'; }
     function closeRecipeModal() { document.getElementById('recipeModal').classList.add('hidden'); document.getElementById('recipeModal').classList.remove('flex'); }
-    function deleteIng(id) { if(confirm('ลบวัตถุดิบนี้?')) google.script.run.withSuccessHandler(() => refreshData()).deleteData('ingredient', id); }
-    function doDelete(id) { if(confirm('ลบเมนูนี้?')) google.script.run.withSuccessHandler(() => refreshData()).deleteData('item', id); }
+
+    function deleteIng(id) {
+  if(!confirm('ลบวัตถุดิบนี้?')) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'deleteData', type: 'ingredient', backendId: id })
+  }).then(() => refreshData());
+}
+
+function doDelete(id) {
+  if(!confirm('ลบเมนูนี้?')) return;
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'deleteData', type: 'item', backendId: id })
+  }).then(() => refreshData());
+}
+    
 
     document.addEventListener('DOMContentLoaded', () => { refreshData(); UNITS.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; document.getElementById('ingUnit').appendChild(o); }); });
   </script>
