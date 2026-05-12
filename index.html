@@ -237,12 +237,8 @@ function refreshData() {
     .then(data => {
       allData = data.items || [];
       allIngredients = data.ingredients || [];
-      renderList(); 
-      renderRecipes(); 
-      renderIngredientsList(); 
-      updateSummaryStats();
-    })
-    .catch(err => console.error("ดึงข้อมูลไม่สำเร็จ:", err));
+      renderList(); renderRecipes(); renderIngredientsList(); updateSummaryStats();
+    });
 }
     function renderList(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
