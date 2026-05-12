@@ -117,6 +117,51 @@
         transform: translateY(0);
       }
     }
+
+    @media print {
+      @page { margin: 15mm; }
+      
+      html, body, #app { 
+        height: auto !important; 
+        display: block !important; 
+        overflow: visible !important; 
+        background: white !important; 
+        margin: 0; padding: 0;
+      }
+      
+      #recipeModal { 
+        position: relative !important; 
+        display: block !important; 
+        background: white !important; 
+        width: 100% !important; 
+        height: auto !important; 
+        padding: 0 !important;
+      }
+      
+      /* เพิ่ม overflow: visible และ max-height: none เพื่อลบแถบสกอร์เลื่อนหน้า */
+      #recipeModal > div { 
+        box-shadow: none !important; 
+        border: none !important; 
+        background: transparent !important;
+        width: 100% !important; 
+        max-width: 100% !important; 
+        max-height: none !important; 
+        overflow: visible !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+      }
+      
+      #printArea { display: block !important; color: black !important; }
+      .grid { display: block !important; }
+
+      /* ย้าย no-print มาไว้ล่างสุด เพื่อบังคับซ่อนต้นทุนและปุ่มแบบ 100% */
+      header, main, button, .no-print { 
+        display: none !important; 
+      }
+    }
+    
+
+
   </style>
 </head>
 
