@@ -30,6 +30,7 @@
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+
   <style>
     tailwind.config = {
       theme: {
@@ -59,13 +60,15 @@
       width: 100%;
     }
 
-    .table-container {
-      background: white;
-      border-radius: 1rem;
-      border: 1px solid #e2e8f0;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    }
+   .table-container { 
+  background: white; 
+  border-radius: 1rem; 
+  border: 1px solid #e2e8f0; 
+  overflow-x: auto; /* ยอมให้เลื่อนซ้ายขวาบนมือถือ */
+  -webkit-overflow-scrolling: touch; 
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
+}
+table { min-width: 600px; width: 100%; border-collapse: collapse; } /* กำหนดความกว้างขั้นต่ำเพื่อให้ข้อมูลไม่เบียด */
 
     table {
       width: 100%;
@@ -118,36 +121,82 @@
       }
     }
 
-@media print { @page { size: A4; margin: 12mm; } html, body { background: white !important; overflow: visible !important; } #recipeModal { position: static !important; inset: 0 !important; display: block !important; background: white !important; padding: 0 !important; } #recipeModal > div { width: 100% !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; } #printArea { width: 100% !important; overflow: visible !important; } button, .no-print, header, nav { display: none !important; } h1 { font-size: 28px !important; } h3 { font-size: 20px !important; } #recipeDetailContent { font-size: 16px !important; line-height: 1.7 !important; } }
+    @media print {
+      @page { margin: 15mm; }
+      
+      html, body, #app { 
+        height: auto !important; 
+        display: block !important; 
+        overflow: visible !important; 
+        background: white !important; 
+        margin: 0; padding: 0;
+      }
+      
+      #recipeModal { 
+        position: relative !important; 
+        display: block !important; 
+        background: white !important; 
+        width: 100% !important; 
+        height: auto !important; 
+        padding: 0 !important;
+      }
+      
+      /* เพิ่ม overflow: visible และ max-height: none เพื่อลบแถบสกอร์เลื่อนหน้า */
+      #recipeModal > div { 
+        box-shadow: none !important; 
+        border: none !important; 
+        background: transparent !important;
+        width: 100% !important; 
+        max-width: 100% !important; 
+        max-height: none !important; 
+        overflow: visible !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+      }
+      
+      #printArea { display: block !important; color: black !important; }
+      .grid { display: block !important; }
+
+      /* ย้าย no-print มาไว้ล่างสุด เพื่อบังคับซ่อนต้นทุนและปุ่มแบบ 100% */
+      header, main, button, .no-print { 
+        display: none !important; 
+      }
+    }
+    
+
+
   </style>
 </head>
 
 <body class="h-full w-full">
   <div id="app" class="flex flex-col h-full w-full">
-    <header class="bg-white border-b border-green-100 p-4 sticky top-0 z-50 shadow-sm w-full no-print">
-      <div class="flex items-center justify-between w-full px-4">
+<header class="bg-white border-b border-green-100 p-4 sticky top-0 z-50 shadow-sm w-full no-print">
+      <div class="flex flex-col md:flex-row items-center justify-between w-full gap-4 px-2 md:px-4">
+        
         <div class="flex items-center gap-3">
-     
-<div class="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-green-100 bg-white">
-  <img src="logo-CostPro.png" class="w-full h-full object-cover">
-</div>
-
-
-<div class="flex flex-col leading-tight"> <span class="text-2xl font-bold font-heading text-green-700"> CostPro-FP </span> <span class="text-[10px] text-slate-400"> แอปคำนวณต้นทุนสินค้า </span> </div>
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-2xl overflow-hidden shadow-md border border-green-100 bg-white flex-shrink-0">
+            <img src="logo-CostPro.png" class="w-full h-full object-cover">
+          </div>
+          <div class="flex flex-col leading-tight"> 
+            <span class="text-xl md:text-2xl font-bold font-heading text-green-700 leading-none">CostPro-FP</span> 
+            <span class="text-[9px] md:text-[10px] text-slate-400 mt-0.5">แอปคำนวณต้นทุนสินค้า</span> 
+          </div>
         </div>
-        <nav class="flex gap-2">
-          <button onclick="switchView('list')" id="btnViewList" class="px-4 py-2 rounded-xl text-sm transition-all">รายการ</button>
-          <button onclick="switchView('recipes')" id="btnViewRecipes" class="px-4 py-2 rounded-xl text-sm transition-all">สูตร</button>
-          <button onclick="switchView('ingredients')" id="btnViewIngredients" class="px-4 py-2 rounded-xl text-sm transition-all">คลัง</button>
-          <button onclick="switchView('add')" id="btnViewAdd" class="px-4 py-2 rounded-xl text-sm font-bold bg-green-600 text-white shadow-sm hover:bg-green-700">+ เพิ่มเมนู</button>
+
+        <nav class="flex gap-1 md:gap-2 overflow-x-auto pb-1 md:pb-0 w-full md:w-auto justify-center scrollbar-hide">
+          <button onclick="switchView('list')" id="btnViewList" class="whitespace-nowrap px-3 py-2 rounded-xl text-xs md:text-sm transition-all">รายการ</button>
+          <button onclick="switchView('recipes')" id="btnViewRecipes" class="whitespace-nowrap px-3 py-2 rounded-xl text-xs md:text-sm transition-all">สูตร</button>
+          <button onclick="switchView('ingredients')" id="btnViewIngredients" class="whitespace-nowrap px-3 py-2 rounded-xl text-xs md:text-sm transition-all">คลัง</button>
+          <button onclick="switchView('add')" id="btnViewAdd" class="whitespace-nowrap px-3 py-2 rounded-xl text-xs md:text-sm font-bold bg-green-600 text-white shadow-sm hover:bg-green-700">+ เพิ่มเมนู</button>
         </nav>
+
       </div>
     </header>
 
     <main class="flex-1 w-full px-6 pb-20 no-print">
       <!-- Stats Summary -->
-      <div id="summaryBar" class="w-full mb-8 grid grid-cols-3 gap-6">
-        <div class="bg-white border border-green-100 rounded-3xl p-6 text-center shadow-sm">
+<div id="summaryBar" class="w-full mb-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div class="bg-white border border-green-100 rounded-3xl p-6 text-center shadow-sm">
           <p class="text-xs font-bold text-green-600 uppercase mb-2">จำนวนเมนู</p>
           <p id="statTotal" class="text-3xl font-bold text-gray-800">0</p>
         </div>
@@ -270,7 +319,8 @@
 
     <!-- Modal สูตร -->
     <div id="recipeModal" class="fixed inset-0 bg-black/50 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
-<div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl print:shadow-none print:max-w-full print:p-0">        <div id="printArea">
+      <div class="bg-white w-full max-w-2xl rounded-[2rem] md:rounded-[3rem] p-4 md:p-10 shadow-2xl overflow-y-auto max-h-[95vh]">
+        <div id="printArea">
           <div id="recipeDetailContent"></div>
         </div>
         <div class="flex gap-3 mt-8 no-print">
