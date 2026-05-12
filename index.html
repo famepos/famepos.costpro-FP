@@ -5,18 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ชื่อเว็บ -->
-  <title>CostPro-FP | แอปคำนวณต้นทุนสินค้า</title>
+  ```html id="zjlwm2"
+<title>CostPro-FP | แอปคำนวณต้นทุนสินค้า</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="logo-CostPro.png">
+<!-- favicon -->
+<link rel="icon" type="image/png" href="logo-CostPro.png">
 
-  <!-- สีธีมบนมือถือ -->
-  <meta name="theme-color" content="#16a34a">
+<!-- สีธีม -->
+<meta name="theme-color" content="#16a34a">
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="CostPro-FP">
-  <meta property="og:description" content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
-  <meta property="og:image" content="logo-CostPro.png">
+<!-- แชร์ลิงก์ -->
+<meta property="og:title" content="CostPro-FP">
+<meta property="og:description" content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
+<meta property="og:image" content="logo-CostPro.png">
+```
+
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -122,8 +125,13 @@
     <header class="bg-white border-b border-green-100 p-4 sticky top-0 z-50 shadow-sm w-full no-print">
       <div class="flex items-center justify-between w-full px-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center shadow-md"><i data-lucide="calculator" class="w-6 h-6 text-white"></i></div>
-          <span class="text-2xl font-bold font-heading text-green-700">CostPro</span>
+     
+<div class="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-green-100 bg-white">
+  <img src="logo-CostPro.png" class="w-full h-full object-cover">
+</div>
+
+
+<div class="flex flex-col leading-tight"> <span class="text-2xl font-bold font-heading text-green-700"> CostPro-FP </span> <span class="text-[10px] text-slate-400"> แอปคำนวณต้นทุนสินค้า </span> </div>
         </div>
         <nav class="flex gap-2">
           <button onclick="switchView('list')" id="btnViewList" class="px-4 py-2 rounded-xl text-sm transition-all">รายการ</button>
@@ -276,7 +284,7 @@
 
   <script>    
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP9ihNhTS6IiSBvZdEjog2B8GDstBBVWBTuKZ27R6mAdM-qUZYJ2ErTvF2uV9p_HImfw/exec";
-    
+
     let allData = [], allIngredients = [], editingId = null, editingIngId = null;
     const UNITS = ["กรัม", "กก.", "มล.", "ลิตร", "ฟอง", "ชิ้น", "อัน", "แพ็ค", "ขวด", "ซอง", "ถุง", "ช้อนชา", "ช้อนโต๊ะ"];
 
