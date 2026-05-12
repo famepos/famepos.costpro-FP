@@ -118,50 +118,7 @@
       }
     }
 
-    @media print {
-      @page { margin: 15mm; }
-      
-      html, body, #app { 
-        height: auto !important; 
-        display: block !important; 
-        overflow: visible !important; 
-        background: white !important; 
-        margin: 0; padding: 0;
-      }
-      
-      #recipeModal { 
-        position: relative !important; 
-        display: block !important; 
-        background: white !important; 
-        width: 100% !important; 
-        height: auto !important; 
-        padding: 0 !important;
-      }
-      
-      /* เพิ่ม overflow: visible และ max-height: none เพื่อลบแถบสกอร์เลื่อนหน้า */
-      #recipeModal > div { 
-        box-shadow: none !important; 
-        border: none !important; 
-        background: transparent !important;
-        width: 100% !important; 
-        max-width: 100% !important; 
-        max-height: none !important; 
-        overflow: visible !important; 
-        padding: 0 !important; 
-        margin: 0 !important; 
-      }
-      
-      #printArea { display: block !important; color: black !important; }
-      .grid { display: block !important; }
-
-      /* ย้าย no-print มาไว้ล่างสุด เพื่อบังคับซ่อนต้นทุนและปุ่มแบบ 100% */
-      header, main, button, .no-print { 
-        display: none !important; 
-      }
-    }
-    
-
-
+@media print { @page { size: A4; margin: 12mm; } html, body { background: white !important; overflow: visible !important; } #recipeModal { position: static !important; inset: 0 !important; display: block !important; background: white !important; padding: 0 !important; } #recipeModal > div { width: 100% !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; } #printArea { width: 100% !important; overflow: visible !important; } button, .no-print, header, nav { display: none !important; } h1 { font-size: 28px !important; } h3 { font-size: 20px !important; } #recipeDetailContent { font-size: 16px !important; line-height: 1.7 !important; } }
   </style>
 </head>
 
@@ -313,8 +270,7 @@
 
     <!-- Modal สูตร -->
     <div id="recipeModal" class="fixed inset-0 bg-black/50 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
-      <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl overflow-y-auto max-h-[90vh]">
-        <div id="printArea">
+<div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl print:shadow-none print:max-w-full print:p-0">        <div id="printArea">
           <div id="recipeDetailContent"></div>
         </div>
         <div class="flex gap-3 mt-8 no-print">
