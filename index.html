@@ -261,11 +261,39 @@
     function editIng(id) { const i = allIngredients.find(x => x.__backendId == id); editingIngId = id; document.getElementById('ingName').value = i.name; document.getElementById('ingQty').value = i.quantity; document.getElementById('ingUnit').value = i.unit; document.getElementById('ingPrice').value = (i.price * i.quantity).toFixed(2); document.getElementById('ingFormTitle').textContent = "แก้ไข: " + i.name; document.getElementById('btnAddIng').textContent = "อัปเดต"; document.getElementById('ingFormContainer').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
     function toggleIngForm() { editingIngId = null; document.getElementById('ingName').value = ''; document.getElementById('ingQty').value = ''; document.getElementById('ingPrice').value = ''; document.getElementById('ingFormTitle').textContent = "เพิ่มวัตถุดิบ"; document.getElementById('btnAddIng').textContent = "บันทึก"; document.getElementById('ingFormContainer').classList.toggle('hidden'); }
 
+// แก้ไขฟังก์ชันบันทึกวัตถุดิบ (GitHub Version)
     function addNewIngredient() {
-      const n = document.getElementById('ingName').value, q = parseFloat(document.getElementById('ingQty').value), p = parseFloat(document.getElementById('ingPrice').value);
+      const n = document.getElementById('ingName').value;
+      const q = parseFloat(document.getElementById('ingQty').value);
+      const p = parseFloat(document.getElementById('ingPrice').value);
+      
       if(!n || !q || !p) return showToast('กรอกให้ครบ', '#991b1b');
-      const payload = { action: 'saveData', type: 'ingredient', record: { __backendId: editingIngId, name: n, quantity: q, price: p/q, unit: document.getElementById('ingUnit').value, category: 'item', created_at: new Date().toISOString() } };
-      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => { showToast('สำเร็จ'); toggleIngForm(); refreshData(); });
+
+      const payload = {
+        action: 'saveData',
+        type: 'ingredient',
+        record: { 
+          __backendId: editingIngId, 
+          name: n, 
+          quantity: q, 
+          price: p/q, 
+          unit: document.getElementById('ingUnit').value, 
+          category: 'item', 
+          created_at: new Date().toISOString() 
+        }
+      };
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(() => {
+        showToast('สำเร็จ');
+        toggleIngForm();
+        refreshData();
+      })
+      .catch(err => console.error("บันทึกไม่สำเร็จ:", err));
     }
 
     function recalcForm() {
@@ -299,14 +327,51 @@
 
     function onSelectIng(select, rowId) { const ing = allIngredients.find(i => i.name === select.value); if (ing) { const row = document.getElementById(rowId); row.querySelector('.u').textContent = ing.unit; row.querySelector('.p').textContent = '฿' + parseFloat(ing.price).toFixed(3); row.querySelector('input[type="hidden"]').value = ing.price; recalcForm(); } }
 
+ // แก้ไขฟังก์ชันบันทึกเมนู (GitHub Version)
     function saveItem() {
-      const name = document.getElementById('formName').value; if(!name) return showToast('ระบุชื่อเมนู', '#991b1b');
+      const name = document.getElementById('formName').value; 
+      if(!name) return showToast('ระบุชื่อเมนู', '#991b1b');
+
       const ings = [], exts = [];
-      document.querySelectorAll('.ingredient-row').forEach(r => { const s = r.querySelector('select').value; if(s) ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value }); });
-      document.querySelectorAll('#extraCostsList > div').forEach(r => { const n = r.querySelector('input[type="text"]').value; if(n) exts.push({ n: n, p: r.querySelector('input[type="number"]').value }); });
-      const t = ings.reduce((s, i) => s + (parseFloat(i.q)*parseFloat(i.p)), 0) + exts.reduce((s, e) => s + parseFloat(e.p || 0), 0), sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
-      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, created_at: new Date().toISOString() } };
-      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => { showToast('สำเร็จ'); refreshData(); switchView('list'); });
+      document.querySelectorAll('.ingredient-row').forEach(r => { 
+        const s = r.querySelector('select').value; 
+        if(s) ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value }); 
+      });
+      document.querySelectorAll('#extraCostsList > div').forEach(r => { 
+        const n = r.querySelector('input[type="text"]').value; 
+        if(n) exts.push({ n: n, p: r.querySelector('input[type="number"]').value }); 
+      });
+
+      const t = ings.reduce((s, i) => s + (parseFloat(i.q)*parseFloat(i.p)), 0) + exts.reduce((s, e) => s + parseFloat(e.p || 0), 0);
+      const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
+
+      const payload = {
+        action: 'saveData',
+        type: 'item',
+        record: { 
+          __backendId: editingId, 
+          item_name: name, 
+          category: document.getElementById('formCategory').value, 
+          ingredients: JSON.stringify({ings, exts}), 
+          total_cost: t, 
+          selling_price: sell, 
+          profit: sell - t, 
+          margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, 
+          created_at: new Date().toISOString() 
+        }
+      };
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(() => {
+        showToast('สำเร็จ');
+        refreshData();
+        switchView('list');
+      })
+      .catch(err => console.error("บันทึกเมนูไม่สำเร็จ:", err));
     }
 
     function editItem(id) {
