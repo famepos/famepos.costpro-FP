@@ -18,46 +18,14 @@
     input, select { background: white !important; border: 1px solid #cbd5e1 !important; color: #1e293b !important; }
     .toast-msg { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 99px; z-index: 999; animation: slideUp 0.3s ease-out both; background: #065f46; color: white; }
     
-@media print {
+    @media print {
       @page { margin: 15mm; }
-      
-      html, body, #app { 
-        height: auto !important; 
-        display: block !important; 
-        overflow: visible !important; 
-        background: white !important; 
-        margin: 0; padding: 0;
-      }
-      
-      #recipeModal { 
-        position: relative !important; 
-        display: block !important; 
-        background: white !important; 
-        width: 100% !important; 
-        height: auto !important; 
-        padding: 0 !important;
-      }
-      
-      /* เพิ่ม overflow: visible และ max-height: none เพื่อลบแถบสกอร์เลื่อนหน้า */
-      #recipeModal > div { 
-        box-shadow: none !important; 
-        border: none !important; 
-        background: transparent !important;
-        width: 100% !important; 
-        max-width: 100% !important; 
-        max-height: none !important; 
-        overflow: visible !important; 
-        padding: 0 !important; 
-        margin: 0 !important; 
-      }
-      
+      html, body, #app { height: auto !important; display: block !important; overflow: visible !important; background: white !important; margin: 0; padding: 0; }
+      #recipeModal { position: relative !important; display: block !important; background: white !important; width: 100% !important; height: auto !important; padding: 0 !important; }
+      #recipeModal > div { box-shadow: none !important; border: none !important; background: transparent !important; width: 100% !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; padding: 0 !important; margin: 0 !important; }
       #printArea { display: block !important; color: black !important; }
       .grid { display: block !important; }
-
-      /* ย้าย no-print มาไว้ล่างสุด เพื่อบังคับซ่อนต้นทุนและปุ่มแบบ 100% */
-      header, main, button, .no-print { 
-        display: none !important; 
-      }
+      header, main, button, .no-print { display: none !important; }
     }
     
     @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -81,7 +49,6 @@
     </header>
 
     <main class="flex-1 w-full px-6 pb-20 no-print">
-      <!-- Stats Summary -->
       <div id="summaryBar" class="w-full mb-8 grid grid-cols-3 gap-6">
         <div class="bg-white border border-green-100 rounded-3xl p-6 text-center shadow-sm">
           <p class="text-xs font-bold text-green-600 uppercase mb-2">จำนวนเมนู</p>
@@ -97,7 +64,6 @@
         </div>
       </div>
 
-      <!-- VIEW: LIST -->
       <div id="viewList" class="w-full space-y-4">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold font-heading text-gray-700">รายการเมนู (ก-ฮ)</h2>
@@ -114,7 +80,6 @@
         </div>
       </div>
 
-      <!-- VIEW: RECIPES -->
       <div id="viewRecipes" class="hidden w-full space-y-4">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold font-heading text-gray-700">คลังสูตรอาหาร</h2>
@@ -131,7 +96,6 @@
         </div>
       </div>
 
-      <!-- VIEW: ADD MENU -->
       <div id="viewAdd" class="hidden w-full space-y-4 anim-slide">
         <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-xl space-y-6">
           <div class="flex justify-between items-center">
@@ -166,7 +130,6 @@
               <div class="flex justify-between font-bold border-t pt-2 text-blue-600"><span>ต้นทุนรวมทั้งหมด:</span><span id="sumTotalCost">฿0.00</span></div>
               <div class="flex justify-between font-bold text-xl border-t pt-2"><span>กำไรสุทธิ:</span><span id="sumProfit" class="text-green-600">฿0.00</span></div>
               <div class="flex justify-between font-bold text-green-700"><span>Margin:</span><span id="sumMargin">0%</span></div>
-              <!-- ปรับตัวเลขแนะนำให้ใหญ่ขึ้นเป็น text-xl และ font-bold -->
               <div class="mt-4 text-xl text-orange-600 italic text-right font-bold bg-orange-50 p-3 rounded-2xl border border-orange-100 shadow-sm">
                 แนะนำ 50%: <span id="suggest50">฿0.00</span> | 60%: <span id="suggest60">฿0.00</span>
               </div>
@@ -176,7 +139,6 @@
         </div>
       </div>
 
-      <!-- VIEW: INVENTORY -->
       <div id="viewIngredients" class="hidden w-full space-y-6 anim-slide">
         <div class="flex justify-between items-center w-full">
           <h2 class="text-2xl font-bold text-green-700 font-heading">📦 คลังวัตถุดิบ</h2>
@@ -204,7 +166,6 @@
       </div>
     </main>
 
-    <!-- Modal สูตร -->
     <div id="recipeModal" class="fixed inset-0 bg-black/50 z-[60] hidden items-center justify-center p-4 backdrop-blur-sm">
       <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl overflow-y-auto max-h-[90vh]">
         <div id="printArea">
@@ -221,6 +182,7 @@
   </div>
 
   <script>
+    // ดึง URL จาก Google Apps Script (Deployment ID)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP9ihNhTS6IiSBvZdEjog2B8GDstBBVWBTuKZ27R6mAdM-qUZYJ2ErTvF2uV9p_HImfw/exec";
     
     let allData = [], allIngredients = [], editingId = null, editingIngId = null;
@@ -231,15 +193,16 @@
       document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
     }
 
-function refreshData() {
-  fetch(`${SCRIPT_URL}?action=getAllData`)
-    .then(res => res.json())
-    .then(data => {
-      allData = data.items || [];
-      allIngredients = data.ingredients || [];
-      renderList(); renderRecipes(); renderIngredientsList(); updateSummaryStats();
-    });
-}
+    function refreshData() {
+      fetch(`${SCRIPT_URL}?action=getAllData`)
+        .then(res => res.json())
+        .then(data => {
+          allData = data.items || [];
+          allIngredients = data.ingredients || [];
+          renderList(); renderRecipes(); renderIngredientsList(); updateSummaryStats();
+        });
+    }
+
     function renderList(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
       document.getElementById('itemListTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold">${item.item_name}</td><td><span class="px-2 py-1 bg-slate-100 rounded text-xs opacity-50">${item.category}</span></td><td class="text-blue-500 font-bold">฿${parseFloat(item.total_cost).toFixed(2)}</td><td>฿${parseFloat(item.selling_price).toFixed(2)}</td><td class="text-green-600 font-bold">${item.margin_percent}%</td><td><div class="flex justify-center gap-2"><button onclick="editItem('${item.__backendId}')" class="p-2 bg-green-50 text-green-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="doDelete('${item.__backendId}')" class="p-2 bg-red-50 text-red-500 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join('');
@@ -258,107 +221,63 @@ function refreshData() {
       lucide.createIcons();
     }
 
-function showRecipeDetail(id) {
+    function showRecipeDetail(id) {
       const item = allData.find(d => d.__backendId == id), data = JSON.parse(item.ingredients);
       document.getElementById('recipeDetailContent').innerHTML = `
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-green-700 font-heading mb-4 border-b-4 border-green-500 pb-4">${item.item_name}</h1>
         </div>
-        
         <div class="no-print grid grid-cols-3 gap-2 py-6 border-y mb-8">
             <div class="text-center"><p class="text-[10px] text-slate-400">ต้นทุน</p><p class="text-2xl font-bold">฿${parseFloat(item.total_cost).toFixed(2)}</p></div>
             <div class="text-center border-x"><p class="text-[10px] text-slate-400">ราคาขาย</p><p class="text-2xl font-bold">฿${parseFloat(item.selling_price).toFixed(2)}</p></div>
             <div class="text-center"><p class="text-[10px] text-slate-400">กำไรสุทธิ</p><p class="text-2xl font-bold">฿${parseFloat(item.profit).toFixed(2)}</p></div>
         </div>
-        
         <div class="w-full">
             <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-slate-200 pb-2">📋 วัตถุดิบที่ใช้</h3>
             <div class="space-y-4">
               ${(data.ings||[]).map(i => `<div class="flex justify-between py-2 border-b border-slate-100 text-xl text-black"><span>• ${i.n}</span><span class="font-bold">${i.q} ${i.u}</span></div>`).join('')}
             </div>
         </div>
-
         <div class="no-print mt-10">
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
             ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n}</span><span>฿${parseFloat(e.p).toFixed(2)}</span></div>`).join('')}
         </div>
-
-       <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
+        <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
         <div class="mt-1 text-center opacity-30 text-[10px] hidden print:block">พัฒนาระบบ โดย เฟรมเอง</div>
       `;
       document.getElementById('recipeModal').classList.remove('hidden'); document.getElementById('recipeModal').classList.add('flex');
       lucide.createIcons();
     }
 
-    // ฟังก์ชันล้างค่าหน้าเพิ่มเมนู (ไม่มีการแจ้งเตือนกวนใจ)
     function resetAddForm() {
       document.getElementById('formName').value = '';
       document.getElementById('formSellingPrice').value = '';
       document.getElementById('ingredientsList').innerHTML = '';
       document.getElementById('extraCostsList').innerHTML = '';
-      editingId = null;
-      recalcForm();
+      editingId = null; recalcForm();
       showToast('ล้างข้อมูลเรียบร้อย', '#64748b');
     }
 
     function editIng(id) { const i = allIngredients.find(x => x.__backendId == id); editingIngId = id; document.getElementById('ingName').value = i.name; document.getElementById('ingQty').value = i.quantity; document.getElementById('ingUnit').value = i.unit; document.getElementById('ingPrice').value = (i.price * i.quantity).toFixed(2); document.getElementById('ingFormTitle').textContent = "แก้ไข: " + i.name; document.getElementById('btnAddIng').textContent = "อัปเดต"; document.getElementById('ingFormContainer').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
     function toggleIngForm() { editingIngId = null; document.getElementById('ingName').value = ''; document.getElementById('ingQty').value = ''; document.getElementById('ingPrice').value = ''; document.getElementById('ingFormTitle').textContent = "เพิ่มวัตถุดิบ"; document.getElementById('btnAddIng').textContent = "บันทึก"; document.getElementById('ingFormContainer').classList.toggle('hidden'); }
-    
+
     function addNewIngredient() {
-      const n = document.getElementById('ingName').value;
-      const q = parseFloat(document.getElementById('ingQty').value);
-      const p = parseFloat(document.getElementById('ingPrice').value);
-      
+      const n = document.getElementById('ingName').value, q = parseFloat(document.getElementById('ingQty').value), p = parseFloat(document.getElementById('ingPrice').value);
       if(!n || !q || !p) return showToast('กรอกให้ครบ', '#991b1b');
-
-      const payload = {
-        action: 'saveData',
-        type: 'ingredient',
-        record: { 
-          __backendId: editingIngId, 
-          name: n, 
-          quantity: q, 
-          price: p/q, 
-          unit: document.getElementById('ingUnit').value, 
-          category: 'item', 
-          created_at: new Date().toISOString() 
-        }
-      };
-
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(() => {
-        showToast('สำเร็จ');
-        toggleIngForm();
-        refreshData();
-      })
-      .catch(err => showToast('เกิดข้อผิดพลาด', '#991b1b'));
+      const payload = { action: 'saveData', type: 'ingredient', record: { __backendId: editingIngId, name: n, quantity: q, price: p/q, unit: document.getElementById('ingUnit').value, category: 'item', created_at: new Date().toISOString() } };
+      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => { showToast('สำเร็จ'); toggleIngForm(); refreshData(); });
     }
+
     function recalcForm() {
       let ingT = 0, extT = 0;
-      document.querySelectorAll('.ingredient-row').forEach(r => { 
-        ingT += (parseFloat(r.querySelector('input[type="number"]').value) || 0) * (parseFloat(r.querySelector('input[type="hidden"]').value) || 0); 
-      });
-      document.querySelectorAll('#extraCostsList > div').forEach(r => { 
-        extT += parseFloat(r.querySelector('input[type="number"]').value) || 0; 
-      });
-      
-      const total = ingT + extT;
-      const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
-      const profit = sell - total;
-      
-      // แก้ไขบัค TypeError ของ margin ตรงนี้
-      const margin = sell > 0 ? ((profit / sell) * 100) : 0;
-      
+      document.querySelectorAll('.ingredient-row').forEach(r => { ingT += (parseFloat(r.querySelector('input[type="number"]').value) || 0) * (parseFloat(r.querySelector('input[type="hidden"]').value) || 0); });
+      document.querySelectorAll('#extraCostsList > div').forEach(r => { extT += parseFloat(r.querySelector('input[type="number"]').value) || 0; });
+      const total = ingT + extT, sell = parseFloat(document.getElementById('formSellingPrice').value) || 0, profit = sell - total, margin = sell > 0 ? ((profit / sell) * 100) : 0;
       document.getElementById('sumIng').textContent = '฿' + ingT.toFixed(2);
       document.getElementById('sumExtra').textContent = '฿' + extT.toFixed(2);
       document.getElementById('sumTotalCost').textContent = '฿' + total.toFixed(2);
       document.getElementById('sumProfit').textContent = '฿' + profit.toFixed(2);
       document.getElementById('sumMargin').textContent = margin.toFixed(1) + '%';
-      
       document.getElementById('suggest50').textContent = '฿' + (total / 0.5).toFixed(2);
       document.getElementById('suggest60').textContent = '฿' + (total / 0.4).toFixed(2);
       document.getElementById('btnSave').innerHTML = `💾 บันทึก (กำไร ฿${profit.toFixed(2)})`;
@@ -386,27 +305,8 @@ function showRecipeDetail(id) {
       document.querySelectorAll('.ingredient-row').forEach(r => { const s = r.querySelector('select').value; if(s) ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value }); });
       document.querySelectorAll('#extraCostsList > div').forEach(r => { const n = r.querySelector('input[type="text"]').value; if(n) exts.push({ n: n, p: r.querySelector('input[type="number"]').value }); });
       const t = ings.reduce((s, i) => s + (parseFloat(i.q)*parseFloat(i.p)), 0) + exts.reduce((s, e) => s + parseFloat(e.p || 0), 0), sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
-
-      const payload = {
-  action: 'saveData',
-  type: 'item',
-  record: { 
-    __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, 
-    ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, 
-    profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, created_at: new Date().toISOString() 
-  }
-};
-
-fetch(SCRIPT_URL, {
-  method: 'POST',
-  body: JSON.stringify(payload)
-})
-.then(res => res.json())
-.then(() => {
-  showToast('สำเร็จ');
-  refreshData();
-  switchView('list');
-});
+      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, created_at: new Date().toISOString() } };
+      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => { showToast('สำเร็จ'); refreshData(); switchView('list'); });
     }
 
     function editItem(id) {
@@ -427,22 +327,8 @@ fetch(SCRIPT_URL, {
     function updateSummaryStats() { document.getElementById('statTotal').textContent = allData.length; const c = allData.reduce((s, i) => s + parseFloat(i.total_cost || 0), 0); document.getElementById('statTotalCost').textContent = '฿' + Math.round(c).toLocaleString(); const m = allData.length ? (allData.reduce((s, i) => s + parseFloat(i.margin_percent || 0), 0) / allData.length).toFixed(1) : 0; document.getElementById('statAvgProfit').textContent = m + '%'; }
     function closeRecipeModal() { document.getElementById('recipeModal').classList.add('hidden'); document.getElementById('recipeModal').classList.remove('flex'); }
 
-    function deleteIng(id) {
-  if(!confirm('ลบวัตถุดิบนี้?')) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deleteData', type: 'ingredient', backendId: id })
-  }).then(() => refreshData());
-}
-
-function doDelete(id) {
-  if(!confirm('ลบเมนูนี้?')) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deleteData', type: 'item', backendId: id })
-  }).then(() => refreshData());
-}
-    
+    function deleteIng(id) { if(!confirm('ลบวัตถุดิบนี้?')) return; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteData', type: 'ingredient', backendId: id }) }).then(() => refreshData()); }
+    function doDelete(id) { if(!confirm('ลบเมนูนี้?')) return; fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteData', type: 'item', backendId: id }) }).then(() => refreshData()); }
 
     document.addEventListener('DOMContentLoaded', () => { refreshData(); UNITS.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; document.getElementById('ingUnit').appendChild(o); }); });
   </script>
