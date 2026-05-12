@@ -3,66 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CostPro Pastel Pro</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    tailwind.config = { theme: { extend: { colors: { pastelGreen: '#D1FAE5', softGreen: '#A7F3D0' }, fontFamily: { heading: ['Kanit', 'sans-serif'], body: ['Sarabun', 'sans-serif'] } } } }
-    html, body { height: 100%; margin: 0; background: #f8fafc; color: #1e293b; font-family: 'Sarabun', sans-serif; }
-    main { padding-top: 100px; width: 100%; }
-    .table-container { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #ecfdf5; color: #065f46; padding: 16px; font-family: 'Kanit'; font-weight: 600; text-align: center; border-bottom: 2px solid #a7f3d0; }
-    td { padding: 16px; border-bottom: 1px solid #f1f5f9; text-align: center; }
-    input, select { background: white !important; border: 1px solid #cbd5e1 !important; color: #1e293b !important; }
-    .toast-msg { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 99px; z-index: 999; animation: slideUp 0.3s ease-out both; background: #065f46; color: white; }
-    
-@media print {
-      @page { margin: 15mm; }
-      
-      html, body, #app { 
-        height: auto !important; 
-        display: block !important; 
-        overflow: visible !important; 
-        background: white !important; 
-        margin: 0; padding: 0;
-      }
-      
-      #recipeModal { 
-        position: relative !important; 
-        display: block !important; 
-        background: white !important; 
-        width: 100% !important; 
-        height: auto !important; 
-        padding: 0 !important;
-      }
-      
-      /* เพิ่ม overflow: visible และ max-height: none เพื่อลบแถบสกอร์เลื่อนหน้า */
-      #recipeModal > div { 
-        box-shadow: none !important; 
-        border: none !important; 
-        background: transparent !important;
-        width: 100% !important; 
-        max-width: 100% !important; 
-        max-height: none !important; 
-        overflow: visible !important; 
-        padding: 0 !important; 
-        margin: 0 !important; 
-      }
-      
-      #printArea { display: block !important; color: black !important; }
-      .grid { display: block !important; }
 
-      /* ย้าย no-print มาไว้ล่างสุด เพื่อบังคับซ่อนต้นทุนและปุ่มแบบ 100% */
-      header, main, button, .no-print { 
-        display: none !important; 
+  <!-- ชื่อเว็บ -->
+  <title>CostPro-FP | แอปคำนวณต้นทุนสินค้า</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo-CostPro.png">
+
+  <!-- สีธีมบนมือถือ -->
+  <meta name="theme-color" content="#16a34a">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="CostPro-FP">
+  <meta property="og:description" content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
+  <meta property="og:image" content="logo-CostPro.png">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+  <!-- Lucide -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pastelGreen: '#D1FAE5',
+            softGreen: '#A7F3D0'
+          },
+          fontFamily: {
+            heading: ['Kanit', 'sans-serif'],
+            body: ['Sarabun', 'sans-serif']
+          }
+        }
       }
     }
-    
-    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #f8fafc;
+      color: #1e293b;
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    main {
+      padding-top: 100px;
+      width: 100%;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #ecfdf5;
+      color: #065f46;
+      padding: 16px;
+      font-family: 'Kanit';
+      font-weight: 600;
+      text-align: center;
+      border-bottom: 2px solid #a7f3d0;
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: center;
+    }
+
+    input, select {
+      background: white !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 99px;
+      z-index: 999;
+      animation: slideUp 0.3s ease-out both;
+      background: #065f46;
+      color: white;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
+
 <body class="h-full w-full">
   <div id="app" class="flex flex-col h-full w-full">
     <header class="bg-white border-b border-green-100 p-4 sticky top-0 z-50 shadow-sm w-full no-print">
