@@ -795,15 +795,35 @@ function saveItem() {
 
   .then(res => res.json())
 
-  .then(() => {
 
-    showToast('สำเร็จ');
+.then(() => {
 
-    refreshData();
+  showToast('บันทึกสำเร็จ');
 
-    switchView('list');
+  // รีโหลดข้อมูล
+  refreshData();
 
-  });
+  // ล้างฟอร์ม
+  document.getElementById('formName').value = '';
+
+  document.getElementById('formSellingPrice').value = '';
+
+  document.getElementById('formCategory').selectedIndex = 0;
+
+  // ล้างรายการวัตถุดิบ
+  document.getElementById('ingredientsList').innerHTML = '';
+
+  // ล้างต้นทุนแฝง
+  document.getElementById('extraCostsList').innerHTML = '';
+
+  // รีเซ็ตตัวเลข
+  recalcForm();
+
+  // กลับหน้ารายการ
+  switchView('list');
+
+});
+
 
 }
 
@@ -827,13 +847,68 @@ function saveItem() {
     function updateSummaryStats() { document.getElementById('statTotal').textContent = allData.length; const c = allData.reduce((s, i) => s + parseFloat(i.total_cost || 0), 0); document.getElementById('statTotalCost').textContent = '฿' + Math.round(c).toLocaleString(); const m = allData.length ? (allData.reduce((s, i) => s + parseFloat(i.margin_percent || 0), 0) / allData.length).toFixed(1) : 0; document.getElementById('statAvgProfit').textContent = m + '%'; }
     function closeRecipeModal() { document.getElementById('recipeModal').classList.add('hidden'); document.getElementById('recipeModal').classList.remove('flex'); }
 
-    function deleteIng(id) {
-  if(!confirm('ลบวัตถุดิบนี้?')) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deleteData', type: 'ingredient', backendId: id })
-  }).then(() => refreshData());
+
+function deleteIngredient(id) {
+
+  Swal.fire({
+
+    title: 'ลบวัตถุดิบนี้?',
+    text: 'ข้อมูลจะถูกลบถาวร',
+
+    icon: 'warning',
+
+    showCancelButton: true,
+
+    confirmButtonColor: '#16a34a',
+
+    cancelButtonColor: '#e2e8f0',
+
+    confirmButtonText: 'ลบเลย',
+
+    cancelButtonText: 'ยกเลิก',
+
+    customClass: {
+
+      popup: 'rounded-[2rem]'
+
+    }
+
+  })
+
+  .then((result) => {
+
+    if (result.isConfirmed) {
+
+      fetch(SCRIPT_URL, {
+
+        method: 'POST',
+
+        body: JSON.stringify({
+
+          action: 'deleteData',
+
+          type: 'ingredient',
+
+          backendId: id
+
+        })
+
+      })
+
+      .then(() => {
+
+        showToast('ลบสำเร็จ');
+
+        refreshData();
+
+      });
+
+    }
+
+  });
+
 }
+
 
 
 function doDelete(id) {
