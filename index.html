@@ -30,6 +30,8 @@
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
   <style>
     tailwind.config = {
@@ -646,34 +648,166 @@ function addExtraCostRow(n='', p='') {
 
 function onSelectIng(input, rowId) { const ing = allIngredients.find( i => i.name === input.value ); if (ing) { const row = document.getElementById(rowId); row.querySelector('.u').textContent = ing.unit; row.querySelector('.p').textContent = '฿' + parseFloat(ing.price).toFixed(3); row.querySelector('input[type="hidden"]').value = ing.price; recalcForm(); } }
 
-    function saveItem() {
-      const name = document.getElementById('formName').value; if(!name) return showToast('ระบุชื่อเมนู', '#991b1b');
-      const ings = [], exts = [];
-      document.querySelectorAll('.ingredient-row').forEach(r => {const s = r.querySelector('input[list]').value;if(s) ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value }); });
-      document.querySelectorAll('#extraCostsList > div').forEach(r => { const n = r.querySelector('input[type="text"]').value; if(n) exts.push({ n: n, p: r.querySelector('input[type="number"]').value }); });
-      const t = ings.reduce((s, i) => s + (parseFloat(i.q)*parseFloat(i.p)), 0) + exts.reduce((s, e) => s + parseFloat(e.p || 0), 0), sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
 
-      const payload = {
-  action: 'saveData',
-  type: 'item',
-  record: { 
-    __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, 
-    ingredients: JSON.stringify({ings, exts}), total_cost: t, selling_price: sell, 
-    profit: sell - t, margin_percent: sell > 0 ? (((sell-t)/sell)*100) : 0, created_at: new Date().toISOString() 
-  }
-};
+function saveItem() {
 
-fetch(SCRIPT_URL, {
-  method: 'POST',
-  body: JSON.stringify(payload)
-})
-.then(res => res.json())
-.then(() => {
-  showToast('สำเร็จ');
-  refreshData();
-  switchView('list');
-});
+  const name =
+    document.getElementById('formName').value;
+
+  if (!name)
+    return showToast('ระบุชื่อเมนู', '#991b1b');
+
+  const ings = [];
+  const exts = [];
+
+  // วัตถุดิบ
+  document
+    .querySelectorAll('.ingredient-row')
+    .forEach(r => {
+
+      const s =
+        r.querySelector('input[list]').value;
+
+      if (s) {
+
+        ings.push({
+
+          n: s,
+
+          q: r.querySelector(
+            'input[type="number"]'
+          ).value,
+
+          u: r.querySelector('.u')
+            .textContent,
+
+          p: r.querySelector(
+            'input[type="hidden"]'
+          ).value
+
+        });
+
+      }
+
+    });
+
+  // ต้นทุนแฝง
+  document
+    .querySelectorAll('#extraCostsList > div')
+    .forEach(r => {
+
+      const n =
+        r.querySelector('input[list]').value;
+
+      if (n) {
+
+        exts.push({
+
+          n: n,
+
+          p: r.querySelector(
+            'input[type="number"]'
+          ).value
+
+        });
+
+      }
+
+    });
+
+  // คำนวณต้นทุน
+  const t =
+
+    ings.reduce(
+      (s, i) =>
+        s + (
+          parseFloat(i.q || 0) *
+          parseFloat(i.p || 0)
+        ),
+      0
+    )
+
+    +
+
+    exts.reduce(
+      (s, e) =>
+        s + parseFloat(e.p || 0),
+      0
+    );
+
+  const sell =
+    parseFloat(
+      document.getElementById(
+        'formSellingPrice'
+      ).value
+    ) || 0;
+
+  // payload
+  const payload = {
+
+    action: 'saveData',
+
+    type: 'item',
+
+    record: {
+
+      __backendId: editingId,
+
+      item_name: name,
+
+      category:
+        document.getElementById(
+          'formCategory'
+        ).value,
+
+      ingredients:
+        JSON.stringify({
+          ings,
+          exts
+        }),
+
+      total_cost: t,
+
+      selling_price: sell,
+
+      profit: sell - t,
+
+      margin_percent:
+        sell > 0
+          ? (((sell - t) / sell) * 100)
+          : 0,
+
+      created_at:
+        new Date().toISOString()
+
     }
+
+  };
+
+  // save
+  fetch(SCRIPT_URL, {
+
+    method: 'POST',
+
+    body: JSON.stringify(payload)
+
+  })
+
+  .then(res => res.json())
+
+  .then(() => {
+
+    showToast('สำเร็จ');
+
+    refreshData();
+
+    switchView('list');
+
+  });
+
+}
+
+
 
     function editItem(id) {
       const item = allData.find(d => d.__backendId == id); editingId = id; switchView('add'); document.getElementById('formName').value = item.item_name; document.getElementById('formSellingPrice').value = item.selling_price; document.getElementById('ingredientsList').innerHTML = ''; document.getElementById('extraCostsList').innerHTML = '';
@@ -701,13 +835,65 @@ fetch(SCRIPT_URL, {
   }).then(() => refreshData());
 }
 
+
 function doDelete(id) {
-  if(!confirm('ลบเมนูนี้?')) return;
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'deleteData', type: 'item', backendId: id })
-  }).then(() => refreshData());
+
+  Swal.fire({
+
+    title: 'ลบเมนูนี้?',
+    text: 'ข้อมูลจะไม่สามารถกู้คืนได้',
+
+    icon: 'warning',
+
+    showCancelButton: true,
+
+    confirmButtonColor: '#16a34a',
+
+    cancelButtonColor: '#e2e8f0',
+
+    confirmButtonText: 'ลบเลย',
+
+    cancelButtonText: 'ยกเลิก',
+
+    borderRadius: '24px'
+
+  })
+
+  .then((result) => {
+
+    if (result.isConfirmed) {
+
+      fetch(SCRIPT_URL, {
+
+        method: 'POST',
+
+        body: JSON.stringify({
+
+          action: 'deleteData',
+
+          type: 'item',
+
+          backendId: id
+
+        })
+
+      })
+
+      .then(() => {
+
+        showToast('ลบสำเร็จ');
+
+        refreshData();
+
+      });
+
+    }
+
+  });
+
 }
+
+
     
 
     document.addEventListener('DOMContentLoaded', () => { refreshData(); UNITS.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; document.getElementById('ingUnit').appendChild(o); }); });
