@@ -219,7 +219,7 @@ table { min-width: 600px; width: 100%; border-collapse: collapse; } /* กำห
           <button onclick="switchView('list')" id="btnViewList" class="whitespace-nowrap px-3 py-2 rounded-xl text-[11px] md:text-sm transition-all">รายการ</button>
           <button onclick="switchView('recipes')" id="btnViewRecipes" class="whitespace-nowrap px-3 py-2 rounded-xl text-[11px] md:text-sm transition-all">สูตร</button>
           <button onclick="switchView('ingredients')" id="btnViewIngredients" class="whitespace-nowrap px-3 py-2 rounded-xl text-[11px] md:text-sm transition-all">คลัง</button>
-          <button onclick="switchView('add')" id="btnViewAdd" class="whitespace-nowrap px-3 py-2 rounded-xl text-[11px] md:text-sm font-bold bg-green-600 text-white">+ เพิ่มเมนู</button>
+       <button onclick="openAddMenuForm()" id="btnViewAdd" class="whitespace-nowrap px-3 py-2 rounded-xl text-[11px] md:text-sm font-bold bg-green-600 text-white">+ เพิ่มเมนู</button>
         </nav>
 
       </div>
@@ -705,29 +705,36 @@ function saveItem() {
   };
 
   // 6. ส่งข้อมูลบันทึก
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(() => {
-    showToast('บันทึกสำเร็จ');
-    refreshData();
-    
-    // ล้างฟอร์ม
-    document.getElementById('formName').value = '';
-    document.getElementById('formSellingPrice').value = '';
-    document.getElementById('formCategory').selectedIndex = 0;
-    document.getElementById('ingredientsList').innerHTML = '';
-    document.getElementById('extraCostsList').innerHTML = '';
-    recalcForm();
-    
-    // กลับหน้ารายการ
-    switchView('list');
-  });
+  fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+      .then(res => res.json())
+      .then((data) => {
+        if(!data.isOk) { return showToast('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่มีข้อมูลตอบกลับ'), '#991b1b'); }
+        showToast('บันทึกสำเร็จ');
+        refreshData();
+        
+        editingId = null; // ⭐ เติมบรรทัดนี้ลงไปเพื่อล้างค่า ID ทันทีหลังกดเซฟสำเร็จ
+        document.getElementById('formName').value = '';
+        document.getElementById('formSellingPrice').value = '';
+        document.getElementById('formCategory').selectedIndex = 0;
+        document.getElementById('ingredientsList').innerHTML = '';
+        document.getElementById('extraCostsList').innerHTML = '';
+        recalcForm();
+        switchView('list');
+      })
 }
 
 
+// ฟังก์ชันสำหรับเปิดหน้าเพิ่มเมนูใหม่แบบเคลียร์ค่า ID เก่า 100%
+    function openAddMenuForm() {
+      editingId = null; // ⭐ สำคัญที่สุด: ล้างค่า ID เพื่อให้เป็นการเพิ่มเมนูใหม่ ไม่ใช่แก้ไขอันเก่า
+      document.getElementById('formName').value = '';
+      document.getElementById('formSellingPrice').value = '';
+      document.getElementById('ingredientsList').innerHTML = '';
+      document.getElementById('extraCostsList').innerHTML = '';
+      recalcForm();
+      switchView('add');
+    }
+    
     function editItem(id) {
       const item = allData.find(d => d.__backendId == id); editingId = id; switchView('add'); document.getElementById('formName').value = item.item_name; document.getElementById('formSellingPrice').value = item.selling_price; document.getElementById('ingredientsList').innerHTML = ''; document.getElementById('extraCostsList').innerHTML = '';
       try { const d = JSON.parse(item.ingredients); (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p)); } catch(e) { addIngredientRow(); } recalcForm();
