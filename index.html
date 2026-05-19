@@ -647,148 +647,84 @@ function addExtraCostRow(n='', q='', u='', p='') {
 function onSelectIng(input, rowId) { const ing = allIngredients.find( i => i.name === input.value ); if (ing) { const row = document.getElementById(rowId); row.querySelector('.u').textContent = ing.unit; row.querySelector('.p').textContent = '฿' + parseFloat(ing.price).toFixed(3); row.querySelector('input[type="hidden"]').value = ing.price; recalcForm(); } }
 
 function saveItem() {
-
-  const name =
-    document.getElementById('formName').value;
-
-  if (!name)
-    return showToast('ระบุชื่อเมนู', '#991b1b');
-
+  const name = document.getElementById('formName').value;
+  if (!name) return showToast('ระบุชื่อเมนู', '#991b1b');
+  
   const ings = [];
   const exts = [];
 
-  // วัตถุดิบ
-  document
-    .querySelectorAll('.ingredient-row')
-    .forEach(r => {
-
-      const s =
-        r.querySelector('input[list]').value;
-
-      if (s) {
-
-        ings.push({
-
-          n: s,
-
-          q: r.querySelector(
-            'input[type="number"]'
-          ).value,
-
-          u: r.querySelector('.u')
-            .textContent,
-
-          p: r.querySelector(
-            'input[type="hidden"]'
-          ).value
-
-        });
-
-      }
-
-    });
-
-  // 1. ค้นหาส่วน "ต้นทุนแฝง" ในฟังก์ชัน saveItem() แล้ววางทับด้วยโค้ดนี้:
-  document.querySelectorAll('#extraCostsList > div').forEach(r => {
-      const n = r.querySelector('input[list]').value;
-      if (n) {
-        exts.push({
-          n: n,
-          q: r.querySelector('input[type="number"]').value,
-          u: r.querySelector('.u').textContent,
-          p: r.querySelector('input[type="hidden"]').value
-        });
-      }
+  // 1. เก็บข้อมูลวัตถุดิบ
+  document.querySelectorAll('.ingredient-row').forEach(r => {
+    const s = r.querySelector('input[list]').value;
+    if (s) {
+      ings.push({
+        n: s,
+        q: r.querySelector('input[type="number"]').value,
+        u: r.querySelector('.u').textContent,
+        p: r.querySelector('input[type="hidden"]').value
+      });
+    }
   });
-  // 2. ค้นหาส่วน "คำนวณต้นทุน (const t = ...)" ในฟังก์ชันเดียวกัน แล้ววางทับด้วยโค้ดนี้:
+
+  // 2. เก็บข้อมูลต้นทุนแฝง (อัปเดตให้มีจำนวนหน่วย)
+  document.querySelectorAll('#extraCostsList > div').forEach(r => {
+    const n = r.querySelector('input[list]').value;
+    if (n) {
+      exts.push({
+        n: n,
+        q: r.querySelector('input[type="number"]').value,
+        u: r.querySelector('.u').textContent,
+        p: r.querySelector('input[type="hidden"]').value
+      });
+    }
+  });
+
+  // 3. คำนวณต้นทุนรวมทั้งหมด
   const t = 
     ings.reduce((s, i) => s + (parseFloat(i.q || 0) * parseFloat(i.p || 0)), 0) +
     exts.reduce((s, e) => s + (parseFloat(e.q || 0) * parseFloat(e.p || 0)), 0);
 
-  // payload
+  // 4. ดึงค่าราคาขาย (ตัวนี้แหละครับที่หายไปจน Error)
+  const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
+
+  // 5. เตรียมข้อมูลส่งเข้า Google Sheets
   const payload = {
-
     action: 'saveData',
-
     type: 'item',
-
     record: {
-
       __backendId: editingId,
-
       item_name: name,
-
-      category:
-        document.getElementById(
-          'formCategory'
-        ).value,
-
-      ingredients:
-        JSON.stringify({
-          ings,
-          exts
-        }),
-
+      category: document.getElementById('formCategory').value,
+      ingredients: JSON.stringify({ ings, exts }),
       total_cost: t,
-
       selling_price: sell,
-
       profit: sell - t,
-
-      margin_percent:
-        sell > 0
-          ? (((sell - t) / sell) * 100)
-          : 0,
-
-      created_at:
-        new Date().toISOString()
-
+      margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0,
+      created_at: new Date().toISOString()
     }
-
   };
 
-  // save
+  // 6. ส่งข้อมูลบันทึก
   fetch(SCRIPT_URL, {
-
     method: 'POST',
-
     body: JSON.stringify(payload)
-
   })
-
   .then(res => res.json())
-
-
-.then(() => {
-
-  showToast('บันทึกสำเร็จ');
-
-  // รีโหลดข้อมูล
-  refreshData();
-
-  // ล้างฟอร์ม
-  document.getElementById('formName').value = '';
-
-  document.getElementById('formSellingPrice').value = '';
-
-  document.getElementById('formCategory').selectedIndex = 0;
-
-  // ล้างรายการวัตถุดิบ
-  document.getElementById('ingredientsList').innerHTML = '';
-
-  // ล้างต้นทุนแฝง
-  document.getElementById('extraCostsList').innerHTML = '';
-
-  // รีเซ็ตตัวเลข
-  recalcForm();
-
-  // กลับหน้ารายการ
-  switchView('list');
-
-});
-
-
-
+  .then(() => {
+    showToast('บันทึกสำเร็จ');
+    refreshData();
+    
+    // ล้างฟอร์ม
+    document.getElementById('formName').value = '';
+    document.getElementById('formSellingPrice').value = '';
+    document.getElementById('formCategory').selectedIndex = 0;
+    document.getElementById('ingredientsList').innerHTML = '';
+    document.getElementById('extraCostsList').innerHTML = '';
+    recalcForm();
+    
+    // กลับหน้ารายการ
+    switchView('list');
+  });
 }
 
 
