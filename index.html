@@ -1,24 +1,41 @@
+
 <!doctype html>
 <html lang="th" class="h-full">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
   <!-- ชื่อเว็บ -->
-<title>CostPro-FP | แอปคำนวณต้นทุนสินค้า</title>
+  <title>
+    CostPro-FP | แอปคำนวณต้นทุนสินค้า
+  </title>
 
-<!-- favicon -->
-<link rel="icon" type="image/png" href="./logo-CostPro.png">
-<link rel="apple-touch-icon" href="./logo-CostPro.png">
+  <!-- favicon -->
+  <link rel="icon"
+        type="image/png"
+        href="./logo-CostPro.png">
 
-<!-- สีธีม -->
-<meta name="theme-color" content="#16a34a">
-<meta property="og:image" content="./logo-CostPro.png">
+  <!-- ios icon -->
+  <link rel="apple-touch-icon"
+        href="./logo-CostPro.png">
 
-<!-- แชร์ลิงก์ -->
-<meta property="og:title" content="CostPro-FP">
-<meta property="og:description" content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
-<meta property="og:image" content="logo-CostPro.png">
+  <!-- สีธีม -->
+  <meta name="theme-color"
+        content="#16a34a">
+
+  <!-- แชร์ลิงก์ -->
+  <meta property="og:title"
+        content="CostPro-FP">
+
+  <meta property="og:description"
+        content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
+
+  <meta property="og:image"
+        content="./logo-CostPro.png">
+
 
 
   <!-- Tailwind -->
@@ -30,8 +47,7 @@
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     tailwind.config = {
@@ -62,14 +78,28 @@
       width: 100%;
     }
 
-   .table-container { 
-  background: white; 
-  border-radius: 1rem; 
-  border: 1px solid #e2e8f0; 
-  overflow-x: auto; /* ยอมให้เลื่อนซ้ายขวาบนมือถือ */
-  -webkit-overflow-scrolling: touch; 
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
-}
+.table-container { 
+      background: white; 
+      border-radius: 1rem; 
+      border: 1px solid #e2e8f0; 
+      overflow-x: auto; /* อนุญาตให้ใช้นิ้วปัดซ้าย-ขวาเพื่อดูตาราง */
+      -webkit-overflow-scrolling: touch; 
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); 
+    }
+    /* เพิ่มความกว้างขั้นต่ำเป็น 750px เพื่อให้ข้อมูลทุกคอลัมน์ไม่อัดกันบนมือถือ */
+    table { 
+      min-width: 750px; 
+      width: 100%; 
+      border-collapse: collapse; 
+      table-layout: auto; 
+    }
+    /* ป้องกันชื่อเมนูตัดคำจนอ่านยาก */
+    td:first-child { 
+      white-space: nowrap; 
+      text-align: left !important; 
+      padding-left: 24px !important;
+    }
+
 table { min-width: 600px; width: 100%; border-collapse: collapse; } /* กำหนดความกว้างขั้นต่ำเพื่อให้ข้อมูลไม่เบียด */
 
     table {
@@ -390,7 +420,7 @@ function refreshData() {
 
     function renderRecipes(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
-      document.getElementById('recipeGridTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold text-green-700">${item.item_name}</td><td>${JSON.parse(item.ingredients).ings.length} รายการ</td><td>฿${JSON.parse(item.ingredients).exts.reduce((a,b)=>a+parseFloat(b.p||0),0).toFixed(2)}</td><td><button onclick="showRecipeDetail('${item.__backendId}')" class="px-4 py-2 bg-green-50 text-green-600 border border-green-100 rounded-xl text-xs font-bold">เปิดสูตร</button></td></tr>`).join('');
+    document.getElementById('recipeGridTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold text-green-700">${item.item_name}</td><td>${JSON.parse(item.ingredients).ings.length} รายการ</td><td>฿${JSON.parse(item.ingredients).exts.reduce((a,b)=>a+(parseFloat(b.q||1)*parseFloat(b.p||0)),0).toFixed(2)}</td><td><button onclick="showRecipeDetail('${item.__backendId}')" class="px-4 py-2 bg-green-50 text-green-600 border border-green-100 rounded-xl text-xs font-bold">เปิดสูตร</button></td></tr>`).join('');
       lucide.createIcons();
     }
 
@@ -422,7 +452,7 @@ function showRecipeDetail(id) {
 
         <div class="no-print mt-10">
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
-            ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n}</span><span>฿${parseFloat(e.p).toFixed(2)}</span></div>`).join('')}
+            ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n} <span class="text-[10px] text-slate-400">${e.q ? `(${e.q} ${e.u})` : ''}</span></span><span>฿${(parseFloat(e.q || 1) * parseFloat(e.p || 0)).toFixed(2)}</span></div>`).join('')}
         </div>
 
        <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
@@ -492,10 +522,10 @@ function addNewIngredient() {
       document.querySelectorAll('.ingredient-row').forEach(r => { 
         ingT += (parseFloat(r.querySelector('input[type="number"]').value) || 0) * (parseFloat(r.querySelector('input[type="hidden"]').value) || 0); 
       });
-      document.querySelectorAll('#extraCostsList > div').forEach(r => { 
-        extT += parseFloat(r.querySelector('input[type="number"]').value) || 0; 
-      });
-      
+  // ค้นหาช่วงโค้ดนี้ในฟังก์ชัน recalcForm() แล้ววางทับครับ
+document.querySelectorAll('#extraCostsList > div').forEach(r => { 
+  extT += (parseFloat(r.querySelector('input[type="number"]').value) || 0) * (parseFloat(r.querySelector('input[type="hidden"]').value) || 0); 
+});
       const total = ingT + extT;
       const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
       const profit = sell - total;
@@ -576,78 +606,45 @@ function addIngredientRow(n='', q='', u='', p='') {
 
 
 function onSelectExtra(input, rowId) {
-
-  const ing = allIngredients.find(
-    i => i.name === input.value
-  );
-
+  const ing = allIngredients.find(i => i.name === input.value);
   if (ing) {
-
-    const row =
-      document.getElementById(rowId);
-
-    row.querySelector('input[type="number"]').value =
-      parseFloat(ing.price).toFixed(2);
-
+    const row = document.getElementById(rowId);
+    row.querySelector('.u').textContent = ing.unit;
+    row.querySelector('.p').textContent = '฿' + parseFloat(ing.price).toFixed(3);
+    row.querySelector('input[type="hidden"]').value = ing.price;
     recalcForm();
   }
 }
 
 
-function addExtraCostRow(n='', p='') {
-
-  const rowId =
-    'ext_' + Math.random().toString(36).substr(2, 9);
-
+function addExtraCostRow(n='', q='', u='', p='') {
+  const rowId = 'ext_' + Math.random().toString(36).substr(2, 9);
   const div = document.createElement('div');
-
-  div.className =
-    'grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm';
-
+  div.className = 'grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm';
   div.id = rowId;
 
   div.innerHTML = `
-
-    <div class="col-span-7">
-
-      <input
-        list="ingredientsData"
-        value="${n}"
-        onchange="onSelectExtra(this, '${rowId}')"
-        placeholder="ค้นหาต้นทุน..."
-        class="w-full bg-slate-50 text-xs p-3 border-none rounded-xl"
-      >
-
+    <div class="col-span-6">
+      <input list="ingredientsData" value="${n}" onchange="onSelectExtra(this, '${rowId}')" placeholder="ค้นหาต้นทุน..." class="w-full bg-slate-50 text-xs p-3 border-none rounded-xl">
     </div>
-
-    <div class="col-span-4">
-
-      <input
-        type="number"
-        value="${p}"
-        oninput="recalcForm()"
-        placeholder="บาท"
-        class="w-full bg-slate-50 text-xs text-right border-none p-3 rounded-xl"
-      >
-
+    <div class="col-span-3">
+      <input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl">
     </div>
-
-    <button
-      onclick="document.getElementById('${rowId}').remove();recalcForm();"
-      class="col-span-1 text-slate-300 hover:text-red-500 font-bold text-xl"
-    >
+    <div class="col-span-2 text-right">
+      <span class="text-[9px] u">${u || '-'}</span><br>
+      <span class="text-[9px] text-blue-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span>
+      <input type="hidden" value="${p || 0}">
+    </div>
+    <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="col-span-1 text-slate-300 hover:text-red-500 font-bold text-xl">
       ×
     </button>
   `;
-
-  document.getElementById('extraCostsList')
-    .appendChild(div);
+  document.getElementById('extraCostsList').appendChild(div);
 }
 
 
 
 function onSelectIng(input, rowId) { const ing = allIngredients.find( i => i.name === input.value ); if (ing) { const row = document.getElementById(rowId); row.querySelector('.u').textContent = ing.unit; row.querySelector('.p').textContent = '฿' + parseFloat(ing.price).toFixed(3); row.querySelector('input[type="hidden"]').value = ing.price; recalcForm(); } }
-
 
 function saveItem() {
 
@@ -691,56 +688,22 @@ function saveItem() {
 
     });
 
-  // ต้นทุนแฝง
-  document
-    .querySelectorAll('#extraCostsList > div')
-    .forEach(r => {
-
-      const n =
-        r.querySelector('input[list]').value;
-
+  // 1. ค้นหาส่วน "ต้นทุนแฝง" ในฟังก์ชัน saveItem() แล้ววางทับด้วยโค้ดนี้:
+  document.querySelectorAll('#extraCostsList > div').forEach(r => {
+      const n = r.querySelector('input[list]').value;
       if (n) {
-
         exts.push({
-
           n: n,
-
-          p: r.querySelector(
-            'input[type="number"]'
-          ).value
-
+          q: r.querySelector('input[type="number"]').value,
+          u: r.querySelector('.u').textContent,
+          p: r.querySelector('input[type="hidden"]').value
         });
-
       }
-
-    });
-
-  // คำนวณต้นทุน
-  const t =
-
-    ings.reduce(
-      (s, i) =>
-        s + (
-          parseFloat(i.q || 0) *
-          parseFloat(i.p || 0)
-        ),
-      0
-    )
-
-    +
-
-    exts.reduce(
-      (s, e) =>
-        s + parseFloat(e.p || 0),
-      0
-    );
-
-  const sell =
-    parseFloat(
-      document.getElementById(
-        'formSellingPrice'
-      ).value
-    ) || 0;
+  });
+  // 2. ค้นหาส่วน "คำนวณต้นทุน (const t = ...)" ในฟังก์ชันเดียวกัน แล้ววางทับด้วยโค้ดนี้:
+  const t = 
+    ings.reduce((s, i) => s + (parseFloat(i.q || 0) * parseFloat(i.p || 0)), 0) +
+    exts.reduce((s, e) => s + (parseFloat(e.q || 0) * parseFloat(e.p || 0)), 0);
 
   // payload
   const payload = {
@@ -825,13 +788,13 @@ function saveItem() {
 });
 
 
-}
 
+}
 
 
     function editItem(id) {
       const item = allData.find(d => d.__backendId == id); editingId = id; switchView('add'); document.getElementById('formName').value = item.item_name; document.getElementById('formSellingPrice').value = item.selling_price; document.getElementById('ingredientsList').innerHTML = ''; document.getElementById('extraCostsList').innerHTML = '';
-      try { const d = JSON.parse(item.ingredients); (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); (d.exts || []).forEach(e => addExtraCostRow(e.n, e.p)); } catch(e) { addIngredientRow(); } recalcForm();
+      try { const d = JSON.parse(item.ingredients); (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p)); } catch(e) { addIngredientRow(); } recalcForm();
     }
 
     function switchView(view) {
@@ -930,7 +893,7 @@ function doDelete(id) {
 
     cancelButtonText: 'ยกเลิก',
 
-customClass: { popup: 'rounded-[2rem]' }
+    customClass: { popup: 'rounded-[2rem]' }
 
   })
 
