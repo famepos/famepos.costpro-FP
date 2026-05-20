@@ -332,14 +332,23 @@
       lucide.createIcons();
     }
 
-    function renderRecipes(f = '') {
+function renderRecipes(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
       document.getElementById('recipeGridTable').innerHTML = s.map(item => {
-        let extTotal = 0;
-        try { extTotal = JSON.parse(item.ingredients).exts.reduce((a,b)=>a+(parseFloat(b.q||1)*parseFloat(b.p||0)),0); } catch(e){}
+        let ingsCount = 0, extTotal = 0;
+        try {
+          const parsed = JSON.parse(item.ingredients || '[]');
+          if (parsed.ings !== undefined) { // รองรับข้อมูลเก่า
+            ingsCount = (parsed.ings || []).length;
+            extTotal = (parsed.exts || []).reduce((a,b)=>a+(parseFloat(b.q||1)*parseFloat(b.p||0)),0);
+          } else { // ดึงข้อมูลแบบใหม่
+            ingsCount = parsed.length;
+            extTotal = JSON.parse(item.extra_costs || '[]').reduce((a,b)=>a+(parseFloat(b.q||1)*parseFloat(b.p||0)),0);
+          }
+        } catch(e){}
         return `<tr>
           <td class="text-left pl-8 font-bold text-green-700">${item.item_name}</td>
-          <td>${JSON.parse(item.ingredients).ings.length} รายการ</td>
+          <td>${ingsCount} รายการ</td>
           <td>฿${extTotal.toFixed(2)}</td>
           <td><button onclick="showRecipeDetail('${item.__backendId}')" class="px-4 py-2 bg-green-50 text-green-600 border border-green-100 rounded-xl text-xs font-bold">เปิดสูตร</button></td>
         </tr>`;
@@ -355,23 +364,38 @@
       lucide.createIcons();
     }
 
-    function showRecipeDetail(id) {
-      const item = allData.find(d => d.__backendId == id), data = JSON.parse(item.ingredients);
+function showRecipeDetail(id) {
+      const item = allData.find(d => d.__backendId == id);
       
-      // 📝 โค้ดหมายเหตุ ซ้าย-ขวา
+      let ings = [], exts = [], remark = item.remark || '', sweetRemark = item.sweet_remark || '';
+      try {
+        const parsed = JSON.parse(item.ingredients || '[]');
+        if (parsed.ings !== undefined) { // รองรับข้อมูลเก่า
+          ings = parsed.ings || []; exts = parsed.exts || [];
+          if(!remark) remark = parsed.remark || '';
+          if(!sweetRemark) sweetRemark = parsed.sweetRemark || '';
+        } else { // ดึงข้อมูลแบบใหม่
+          ings = parsed; exts = JSON.parse(item.extra_costs || '[]');
+        }
+      } catch(e) {}
+
+      // 💡 โค้ดใหม่: แปลง <br> กลับเป็นขึ้นบรรทัดใหม่เพื่อแสดงผลในหน้าใบสูตร
+      const printRemark = remark.replace(/<br>/g, '\n');
+      const printSweetRemark = sweetRemark.replace(/<br>/g, '\n');
+
       let remarksHtml = '';
-      if (data.remark || data.sweetRemark) {
+      if (printRemark || printSweetRemark) {
         remarksHtml = `
           <div class="mt-8 flex flex-col md:flex-row gap-4 print:flex-row print:w-full">
-            ${data.remark ? `
+            ${printRemark ? `
               <div class="flex-1 bg-yellow-50 p-6 rounded-3xl border border-yellow-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none print:w-1/2">
                   <h3 class="text-lg font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-2 print:text-black print:border-black">📝 หมายเหตุ / วิธีทำ</h3>
-                  <p class="text-sm text-yellow-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.remark}</p>
+                  <p class="text-sm text-yellow-900 whitespace-pre-wrap leading-relaxed print:text-black">${printRemark}</p>
               </div>` : ''}
-            ${data.sweetRemark ? `
+            ${printSweetRemark ? `
               <div class="flex-1 bg-amber-50 p-6 rounded-3xl border border-amber-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none print:w-1/2">
                   <h3 class="text-lg font-bold text-amber-800 mb-2 border-b border-amber-200 pb-2 print:text-black print:border-black">🍯 หมายเหตุความหวาน</h3>
-                  <p class="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.sweetRemark}</p>
+                  <p class="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed print:text-black">${printSweetRemark}</p>
               </div>` : ''}
           </div>`;
       }
@@ -388,14 +412,14 @@
         <div class="w-full">
             <h3 class="text-2xl font-bold text-green-800 mb-4 border-b-2 border-slate-200 pb-2">📋 วัตถุดิบที่ใช้</h3>
             <div class="space-y-4">
-              ${(data.ings||[]).map(i => `<div class="flex justify-between py-2 border-b border-slate-100 text-xl text-black"><span>• ${i.n}</span><span class="font-bold">${i.q} ${i.u}</span></div>`).join('')}
+              ${ings.map(i => `<div class="flex justify-between py-2 border-b border-slate-100 text-xl text-black"><span>• ${i.n}</span><span class="font-bold">${i.q} ${i.u}</span></div>`).join('')}
             </div>
         </div>
         
         <div class="no-print mt-10">
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
             <div class="space-y-2 mt-2">
-              ${(data.exts||[]).map(e => `<div class="flex justify-between py-2 border-b border-slate-50 text-black"><span>- ${e.n}</span><span class="font-bold text-slate-600">${e.q ? `${e.q} ${e.u}` : ''}</span></div>`).join('')}
+              ${exts.map(e => `<div class="flex justify-between py-2 border-b border-slate-50 text-black"><span>- ${e.n}</span><span class="font-bold text-slate-600">${e.q ? `${e.q} ${e.u}` : ''}</span></div>`).join('')}
             </div>
         </div>
 
@@ -430,24 +454,34 @@
       showToast('ล้างข้อมูลเรียบร้อย', '#64748b');
     }
 
-    function editItem(id) {
+function editItem(id) {
       const item = allData.find(d => d.__backendId == id);
       editingId = id; switchView('add'); 
       document.getElementById('formName').value = item.item_name; 
       document.getElementById('formSellingPrice').value = item.selling_price; 
       document.getElementById('ingredientsList').innerHTML = ''; 
       document.getElementById('extraCostsList').innerHTML = '';
-      try { 
-        const d = JSON.parse(item.ingredients); 
-        document.getElementById('formRemark').value = d.remark || '';
-        document.getElementById('formSweetRemark').value = d.sweetRemark || ''; // ดึงข้อมูลหมายเหตุความหวาน
-        (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); 
-        (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p));
-      } catch(e) { 
-        addIngredientRow(); 
-        document.getElementById('formRemark').value = ''; 
-        document.getElementById('formSweetRemark').value = ''; 
-      } 
+      
+      let ings = [], exts = [], remark = item.remark || '', sweetRemark = item.sweet_remark || '';
+      try {
+        const parsed = JSON.parse(item.ingredients || '[]');
+        if (parsed.ings !== undefined) { // ดึงข้อมูลเก่า
+          ings = parsed.ings || []; exts = parsed.exts || [];
+          if(!remark) remark = parsed.remark || '';
+          if(!sweetRemark) sweetRemark = parsed.sweetRemark || '';
+        } else { // ดึงข้อมูลใหม่
+          ings = parsed; exts = JSON.parse(item.extra_costs || '[]');
+        }
+      } catch(e) {}
+
+      // 💡 โค้ดใหม่: แปลง <br> จากในชีต กลับมาเป็นการขึ้นบรรทัดใหม่ในช่องกรอก
+      document.getElementById('formRemark').value = remark.replace(/<br>/g, '\n');
+      document.getElementById('formSweetRemark').value = sweetRemark.replace(/<br>/g, '\n'); 
+      
+      ings.forEach(i => addIngredientRow(i.n, i.q, i.u, i.p));
+      exts.forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p));
+      if (ings.length === 0) addIngredientRow();
+      
       recalcForm();
     }
 
@@ -556,7 +590,7 @@ function addExtraCostRow(n='', q='', u='', p='') {
       }
     }
 
-    function saveItem() {
+function saveItem() {
       const name = document.getElementById('formName').value;
       if (!name) return showToast('ระบุชื่อเมนู', '#991b1b');
       const ings = [], exts = [];
@@ -570,10 +604,13 @@ function addExtraCostRow(n='', q='', u='', p='') {
       });
       const t = ings.reduce((s, i) => s + (parseFloat(i.q || 0) * parseFloat(i.p || 0)), 0) + exts.reduce((s, e) => s + (parseFloat(e.q || 0) * parseFloat(e.p || 0)), 0);
       const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
-      const remark = document.getElementById('formRemark').value;
-      const sweetRemark = document.getElementById('formSweetRemark').value; // บันทึกหมายเหตุความหวานเพิ่ม
+      
+      // 💡 โค้ดใหม่: แปลงการเคาะบรรทัด (Enter) ให้เป็น <br> จะได้อยู่บรรทัดเดียวในชีต
+      const remark = document.getElementById('formRemark').value.replace(/\n/g, '<br>');
+      const sweetRemark = document.getElementById('formSweetRemark').value.replace(/\n/g, '<br>');
 
-      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ ings, exts, remark, sweetRemark }), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0, created_at: new Date().toISOString() } };
+      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify(ings), extra_costs: JSON.stringify(exts), remark: remark, sweet_remark: sweetRemark, total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0, created_at: new Date().toISOString() } };
+      
       fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => {
         showToast('บันทึกสำเร็จ'); refreshData(); openAddMenuForm(); switchView('list');
       });
