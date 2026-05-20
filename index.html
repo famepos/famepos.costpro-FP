@@ -317,6 +317,11 @@ table { min-width: 600px; width: 100%; border-collapse: collapse; } /* กำห
               </div>
             </div>
           </div>
+    <div class="bg-yellow-50 p-6 rounded-3xl border border-yellow-100 space-y-2 shadow-sm">
+            <label class="font-bold text-yellow-800">📝 หมายเหตุ / วิธีทำ <span class="text-xs font-normal text-yellow-600">(แสดงในใบสูตร)</span></label>
+            <textarea id="formRemark" class="w-full rounded-2xl px-6 py-4 border border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-400" rows="3" placeholder="พิมพ์ข้อความหมายเหตุ หรือขั้นตอนการทำที่นี่..."></textarea>
+          </div>
+          
           <button onclick="saveItem()" id="btnSave" class="w-full py-5 rounded-2xl bg-green-600 text-white font-bold text-xl shadow-lg hover:bg-green-700">💾 บันทึกเมนู</button>
         </div>
       </div>
@@ -414,7 +419,7 @@ function refreshData() {
 
     function renderList(f = '') {
       const s = [...allData].sort((a,b) => a.item_name.localeCompare(b.item_name, 'th')).filter(i => i.item_name.includes(f));
-      document.getElementById('itemListTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold">${item.item_name}</td><td><span class="px-2 py-1 bg-slate-100 rounded text-xs opacity-50">${item.category}</span></td><td class="text-blue-500 font-bold">฿${parseFloat(item.total_cost).toFixed(2)}</td><td>฿${parseFloat(item.selling_price).toFixed(2)}</td><td class="text-green-600 font-bold">${item.margin_percent}%</td><td><div class="flex justify-center gap-2"><button onclick="editItem('${item.__backendId}')" class="p-2 bg-green-50 text-green-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="doDelete('${item.__backendId}')" class="p-2 bg-red-50 text-red-500 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join('');
+      document.getElementById('itemListTable').innerHTML = s.map(item => `<tr><td class="text-left pl-8 font-bold">${item.item_name}</td><td><span class="px-2 py-1 bg-slate-100 rounded text-xs opacity-50">${item.category}</span></td><td class="text-blue-500 font-bold">฿${parseFloat(item.total_cost).toFixed(2)}</td><td>฿${parseFloat(item.selling_price).toFixed(2)}</td><td class="text-green-600 font-bold">${parseFloat(item.margin_percent || 0).toFixed(1)}%</td><td><div class="flex justify-center gap-2"><button onclick="editItem('${item.__backendId}')" class="p-2 bg-green-50 text-green-600 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button><button onclick="doDelete('${item.__backendId}')" class="p-2 bg-red-50 text-red-500 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td></tr>`).join('');
       lucide.createIcons();
     }
 
@@ -430,8 +435,18 @@ function refreshData() {
       lucide.createIcons();
     }
 
-function showRecipeDetail(id) {
+// 5. ฟังก์ชันเปิดดูสูตรและปริ้น (เพิ่มกล่องหมายเหตุ)
+    function showRecipeDetail(id) {
       const item = allData.find(d => d.__backendId == id), data = JSON.parse(item.ingredients);
+      
+      // สร้าง HTML สำหรับหมายเหตุ ถ้ามีข้อมูล
+      const remarkHtml = data.remark ? `
+        <div class="mt-8 bg-yellow-50 p-6 rounded-3xl border border-yellow-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none">
+            <h3 class="text-lg font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-2 print:text-black print:border-black">📝 หมายเหตุ / วิธีทำ</h3>
+            <p class="text-sm text-yellow-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.remark}</p>
+        </div>
+      ` : '';
+
       document.getElementById('recipeDetailContent').innerHTML = `
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-green-700 font-heading mb-4 border-b-4 border-green-500 pb-4">${item.item_name}</h1>
@@ -454,23 +469,39 @@ function showRecipeDetail(id) {
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
             ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n} <span class="text-[10px] text-slate-400">${e.q ? `(${e.q} ${e.u})` : ''}</span></span><span>฿${(parseFloat(e.q || 1) * parseFloat(e.p || 0)).toFixed(2)}</span></div>`).join('')}
         </div>
+        
+        ${remarkHtml}
 
-       <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
+        <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
         <div class="mt-1 text-center opacity-30 text-[10px] hidden print:block">พัฒนาระบบ โดย เฟรมเอง</div>
       `;
       document.getElementById('recipeModal').classList.remove('hidden'); document.getElementById('recipeModal').classList.add('flex');
       lucide.createIcons();
     }
 
-    // ฟังก์ชันล้างค่าหน้าเพิ่มเมนู (ไม่มีการแจ้งเตือนกวนใจ)
-    function resetAddForm() {
-      document.getElementById('formName').value = '';
-      document.getElementById('formSellingPrice').value = '';
-      document.getElementById('ingredientsList').innerHTML = '';
-      document.getElementById('extraCostsList').innerHTML = '';
-      editingId = null;
-      recalcForm();
-      showToast('ล้างข้อมูลเรียบร้อย', '#64748b');
+// ฟังก์ชันสำหรับสลับหน้าจอ (ที่เผลอลบหายไป)
+    function switchView(view) {
+      ['viewList', 'viewAdd', 'viewIngredients', 'viewRecipes', 'summaryBar'].forEach(id => { 
+        const el = document.getElementById(id); 
+        if(el) el.classList.add('hidden'); 
+      });
+      const navs = ['btnViewList', 'btnViewAdd', 'btnViewIngredients', 'btnViewRecipes'];
+      navs.forEach(id => {
+        const btn = document.getElementById(id);
+        if(btn) btn.className = "px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-green-600";
+      });
+      
+      const viewEl = document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1));
+      if(viewEl) viewEl.classList.remove('hidden');
+      
+      const btnEl = document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1));
+      if(btnEl) btnEl.className = "px-4 py-2 rounded-xl text-sm font-bold bg-green-50 text-green-700 border border-green-100";
+      
+      if(view === 'list' || view === 'recipes') {
+        const sumBar = document.getElementById('summaryBar');
+        if(sumBar) sumBar.classList.remove('hidden');
+      }
+      lucide.createIcons();
     }
 
     function editIng(id) { const i = allIngredients.find(x => x.__backendId == id); editingIngId = id; document.getElementById('ingName').value = i.name; document.getElementById('ingQty').value = i.quantity; document.getElementById('ingUnit').value = i.unit; document.getElementById('ingPrice').value = (i.price * i.quantity).toFixed(2); document.getElementById('ingFormTitle').textContent = "แก้ไข: " + i.name; document.getElementById('btnAddIng').textContent = "อัปเดต"; document.getElementById('ingFormContainer').classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
@@ -723,31 +754,105 @@ function saveItem() {
       })
 }
 
-
-// ฟังก์ชันสำหรับเปิดหน้าเพิ่มเมนูใหม่แบบเคลียร์ค่า ID เก่า 100%
+// 1. ฟังก์ชันเปิดหน้าเพิ่มเมนู (เพิ่มการล้างช่องหมายเหตุ)
     function openAddMenuForm() {
-      editingId = null; // ⭐ สำคัญที่สุด: ล้างค่า ID เพื่อให้เป็นการเพิ่มเมนูใหม่ ไม่ใช่แก้ไขอันเก่า
+      editingId = null;
       document.getElementById('formName').value = '';
       document.getElementById('formSellingPrice').value = '';
+      document.getElementById('formRemark').value = ''; // เคลียร์หมายเหตุ
       document.getElementById('ingredientsList').innerHTML = '';
       document.getElementById('extraCostsList').innerHTML = '';
       recalcForm();
       switchView('add');
     }
     
+// 2. ฟังก์ชันแก้ไขเมนู (ดึงหมายเหตุเก่ามาแสดง)
     function editItem(id) {
-      const item = allData.find(d => d.__backendId == id); editingId = id; switchView('add'); document.getElementById('formName').value = item.item_name; document.getElementById('formSellingPrice').value = item.selling_price; document.getElementById('ingredientsList').innerHTML = ''; document.getElementById('extraCostsList').innerHTML = '';
-      try { const d = JSON.parse(item.ingredients); (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p)); } catch(e) { addIngredientRow(); } recalcForm();
+      const item = allData.find(d => d.__backendId == id);
+      editingId = id; 
+      switchView('add'); 
+      document.getElementById('formName').value = item.item_name; 
+      document.getElementById('formSellingPrice').value = item.selling_price; 
+      document.getElementById('ingredientsList').innerHTML = ''; 
+      document.getElementById('extraCostsList').innerHTML = '';
+      try { 
+        const d = JSON.parse(item.ingredients); 
+        document.getElementById('formRemark').value = d.remark || ''; // ดึงหมายเหตุ
+        (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p));
+        (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p)); 
+      } catch(e) { 
+        addIngredientRow(); 
+        document.getElementById('formRemark').value = '';
+      } 
+      recalcForm();
     }
 
-    function switchView(view) {
-      ['viewList', 'viewAdd', 'viewIngredients', 'viewRecipes', 'summaryBar'].forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
-      const navs = ['btnViewList', 'btnViewAdd', 'btnViewIngredients', 'btnViewRecipes'];
-      navs.forEach(id => document.getElementById(id).className = "px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-green-600");
-      document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
-      document.getElementById('btnView' + view.charAt(0).toUpperCase() + view.slice(1)).className = "px-4 py-2 rounded-xl text-sm font-bold bg-green-50 text-green-700 border border-green-100";
-      if(view === 'list' || view === 'recipes') document.getElementById('summaryBar').classList.remove('hidden');
-      lucide.createIcons();
+// 3. ฟังก์ชันปุ่มล้างข้อมูล (เพิ่มล้างหมายเหตุ)
+    function resetAddForm() {
+      document.getElementById('formName').value = '';
+      document.getElementById('formSellingPrice').value = '';
+      document.getElementById('formRemark').value = ''; // เคลียร์หมายเหตุ
+      document.getElementById('ingredientsList').innerHTML = '';
+      document.getElementById('extraCostsList').innerHTML = '';
+      editingId = null;
+      recalcForm();
+      showToast('ล้างข้อมูลเรียบร้อย', '#64748b');
+    }
+
+    // 4. ฟังก์ชันบันทึกข้อมูล (เพิ่มเก็บค่าหมายเหตุส่งเข้า Database)
+    function saveItem() {
+      const name = document.getElementById('formName').value;
+      if (!name) return showToast('ระบุชื่อเมนู', '#991b1b');
+      
+      const ings = [];
+      const exts = [];
+
+      document.querySelectorAll('.ingredient-row').forEach(r => {
+        const s = r.querySelector('input[list]').value;
+        if (s) {
+          ings.push({ n: s, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value });
+        }
+      });
+
+      document.querySelectorAll('#extraCostsList > div').forEach(r => {
+        const n = r.querySelector('input[list]').value;
+        if (n) {
+          exts.push({ n: n, q: r.querySelector('input[type="number"]').value, u: r.querySelector('.u').textContent, p: r.querySelector('input[type="hidden"]').value });
+        }
+      });
+
+      const t = 
+        ings.reduce((s, i) => s + (parseFloat(i.q || 0) * parseFloat(i.p || 0)), 0) +
+        exts.reduce((s, e) => s + (parseFloat(e.q || 0) * parseFloat(e.p || 0)), 0);
+
+      const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
+      const remark = document.getElementById('formRemark').value; // ดึงข้อความหมายเหตุ
+
+      const payload = {
+        action: 'saveData',
+        type: 'item',
+        record: {
+          __backendId: editingId,
+          item_name: name,
+          category: document.getElementById('formCategory').value,
+          ingredients: JSON.stringify({ ings, exts, remark }), // ฝังหมายเหตุไปกับวัตถุดิบ
+          total_cost: t,
+          selling_price: sell,
+          profit: sell - t,
+          margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0,
+          created_at: new Date().toISOString()
+        }
+      };
+
+      fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+          .then(res => res.json())
+          .then((data) => {
+            if(!data.isOk) { return showToast('เกิดข้อผิดพลาด', '#991b1b'); }
+            showToast('บันทึกสำเร็จ');
+            refreshData();
+            openAddMenuForm(); // เรียกใช้ฟังก์ชันให้เคลียร์ค่าทั้งหมด
+            switchView('list');
+          })
     }
 
     function updateSummaryStats() { document.getElementById('statTotal').textContent = allData.length; const c = allData.reduce((s, i) => s + parseFloat(i.total_cost || 0), 0); document.getElementById('statTotalCost').textContent = '฿' + Math.round(c).toLocaleString(); const m = allData.length ? (allData.reduce((s, i) => s + parseFloat(i.margin_percent || 0), 0) / allData.length).toFixed(1) : 0; document.getElementById('statAvgProfit').textContent = m + '%'; }
