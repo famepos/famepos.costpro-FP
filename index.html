@@ -1,23 +1,70 @@
+
 <!doctype html>
 <html lang="th" class="h-full">
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CostPro-FP | แอปคำนวณต้นทุนสินค้า</title>
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <!-- ชื่อเว็บ -->
+  <title>
+    CostPro-FP | แอปคำนวณต้นทุนสินค้า
+  </title>
+
+  <!-- favicon -->
+  <link rel="icon"
+        type="image/png"
+        href="./logo-CostPro.png">
+
+  <!-- ios icon -->
+  <link rel="apple-touch-icon"
+        href="./logo-CostPro.png">
+
+  <!-- สีธีม -->
+  <meta name="theme-color"
+        content="#16a34a">
+
+  <!-- แชร์ลิงก์ -->
+  <meta property="og:title"
+        content="CostPro-FP">
+
+  <meta property="og:description"
+        content="แอปคำนวณต้นทุนสินค้า ชา กาแฟ อาหาร">
+
+  <meta property="og:image"
+        content="./logo-CostPro.png">
+
+
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+  <!-- Lucide -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     tailwind.config = {
       theme: {
         extend: {
-          colors: { pastelGreen: '#D1FAE5', softGreen: '#A7F3D0' },
-          fontFamily: { heading: ['Kanit', 'sans-serif'], body: ['Sarabun', 'sans-serif'] }
+          colors: {
+            pastelGreen: '#D1FAE5',
+            softGreen: '#A7F3D0'
+          },
+          fontFamily: {
+            heading: ['Kanit', 'sans-serif'],
+            body: ['Sarabun', 'sans-serif']
+          }
         }
       }
     }
+
     html, body { height: 100%; margin: 0; background: #f8fafc; color: #1e293b; font-family: 'Sarabun', sans-serif; }
     main { padding-top: 100px; width: 100%; }
     .table-container { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
