@@ -272,7 +272,23 @@
   <script>    
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwP9ihNhTS6IiSBvZdEjog2B8GDstBBVWBTuKZ27R6mAdM-qUZYJ2ErTvF2uV9p_HImfw/exec";
     let allData = [], allIngredients = [], editingId = null, editingIngId = null;
-    const UNITS = ["กรัม", "กก.", "มล.", "ลิตร", "ฟอง", "ชิ้น", "อัน", "แพ็ค", "ขวด", "ซอง", "ถุง", "ช้อนชา", "ช้อนโต๊ะ", "งาน"];
+    const UNITS = ["กรัม", "กระป๋อง.", "มล.", "ลิตร", "ฟอง", "ชิ้น", "อัน", "แพ็ค", "ขวด", "ซอง", "ถุง", "ช้อนชา", "ช้อนโต๊ะ", "งาน"];
+
+    // ฟังก์ชันเลื่อนบรรทัดขึ้น
+    function moveRowUp(rowId) {
+      const row = document.getElementById(rowId);
+      if (row && row.previousElementSibling) {
+        row.parentNode.insertBefore(row, row.previousElementSibling);
+      }
+    }
+
+    // ฟังก์ชันเลื่อนบรรทัดลง
+    function moveRowDown(rowId) {
+      const row = document.getElementById(rowId);
+      if (row && row.nextElementSibling) {
+        row.parentNode.insertBefore(row.nextElementSibling, row);
+      }
+    }
 
     function showToast(m, c) {
       const t = document.createElement('div'); t.className = 'toast-msg shadow-lg';
@@ -483,18 +499,25 @@
       document.getElementById('btnSave').innerHTML = `💾 บันทึก (กำไร ฿${profit.toFixed(2)})`;
     }
 
-    function addIngredientRow(n='', q='', u='', p='') {
+function addIngredientRow(n='', q='', u='', p='') {
       const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
       const div = document.createElement('div');
-      div.className = 'ingredient-row grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; div.id = rowId;
+      div.className = 'ingredient-row grid grid-cols-12 gap-1 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; 
+      div.id = rowId;
       div.innerHTML = `
-      <div class="col-span-6"><input list="ingredientsData" value="${n}" onchange="onSelectIng(this, '${rowId}')" placeholder="ค้นหาวัตถุดิบ..." class="w-full bg-slate-50 text-xs p-3 rounded-xl border-none"></div>
-      <div class="col-span-3"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
-      <div class="col-span-2 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-green-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
-      <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="col-span-1 text-slate-300 hover:text-red-500 font-bold text-xl">×</button>`;
+      <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectIng(this, '${rowId}')" placeholder="ค้นหาวัตถุดิบ..." class="w-full bg-slate-50 text-xs p-3 rounded-xl border-none"></div>
+      <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
+      <div class="col-span-3 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-green-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
+      
+      <div class="col-span-2 flex justify-end items-center pr-1">
+        <div class="flex flex-col border-r pr-2 mr-2 border-slate-200">
+          <button onclick="moveRowUp('${rowId}')" class="text-slate-300 hover:text-green-600 text-[10px] leading-none pb-1" title="เลื่อนขึ้น">▲</button>
+          <button onclick="moveRowDown('${rowId}')" class="text-slate-300 hover:text-green-600 text-[10px] leading-none pt-1" title="เลื่อนลง">▼</button>
+        </div>
+        <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="text-slate-300 hover:text-red-500 font-bold text-2xl leading-none" title="ลบ">×</button>
+      </div>`;
       document.getElementById('ingredientsList').appendChild(div);
     }
-
     function onSelectIng(input, rowId) { 
       const ing = allIngredients.find( i => i.name === input.value );
       if (ing) { 
@@ -502,15 +525,23 @@
       } 
     }
 
-    function addExtraCostRow(n='', q='', u='', p='') {
+function addExtraCostRow(n='', q='', u='', p='') {
       const rowId = 'ext_' + Math.random().toString(36).substr(2, 9);
       const div = document.createElement('div');
-      div.className = 'grid grid-cols-12 gap-2 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; div.id = rowId;
+      div.className = 'grid grid-cols-12 gap-1 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; 
+      div.id = rowId;
       div.innerHTML = `
-        <div class="col-span-6"><input list="ingredientsData" value="${n}" onchange="onSelectExtra(this, '${rowId}')" placeholder="ค้นหาต้นทุน..." class="w-full bg-slate-50 text-xs p-3 border-none rounded-xl"></div>
-        <div class="col-span-3"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
-        <div class="col-span-2 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-blue-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
-        <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="col-span-1 text-slate-300 hover:text-red-500 font-bold text-xl">×</button>`;
+        <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectExtra(this, '${rowId}')" placeholder="ค้นหาต้นทุน..." class="w-full bg-slate-50 text-xs p-3 border-none rounded-xl"></div>
+        <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
+        <div class="col-span-3 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-blue-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
+        
+        <div class="col-span-2 flex justify-end items-center pr-1">
+          <div class="flex flex-col border-r pr-2 mr-2 border-slate-200">
+            <button onclick="moveRowUp('${rowId}')" class="text-slate-300 hover:text-blue-600 text-[10px] leading-none pb-1" title="เลื่อนขึ้น">▲</button>
+            <button onclick="moveRowDown('${rowId}')" class="text-slate-300 hover:text-blue-600 text-[10px] leading-none pt-1" title="เลื่อนลง">▼</button>
+          </div>
+          <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="text-slate-300 hover:text-red-500 font-bold text-2xl leading-none" title="ลบ">×</button>
+        </div>`;
       document.getElementById('extraCostsList').appendChild(div);
     }
 
