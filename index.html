@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="th" class="h-full">
 <head>
@@ -93,8 +92,8 @@
       <div class="flex flex-col md:flex-row items-center justify-between w-full gap-3 md:gap-4 px-1 md:px-4">
         <div class="flex items-center gap-3 w-full md:w-auto">
           <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-sm border border-green-50 bg-white flex-shrink-0">
-    <img src="https://i.postimg.cc/rFwqcyfS/logo-Cost-Pro.png" class="w-full h-full object-cover">
-</div>
+            <img src="https://i.postimg.cc/rFwqcyfS/logo-Cost-Pro.png" class="w-full h-full object-cover">
+          </div>
           <div class="flex flex-col leading-tight"> 
             <span class="text-lg md:text-2xl font-bold font-heading text-green-700">CostPro-FP</span> 
             <span class="text-[9px] md:text-[10px] text-slate-400">แอปคำนวณต้นทุนสินค้า</span> 
@@ -207,16 +206,22 @@
             </div>
           </div>
 
-          <div class="bg-yellow-50 p-6 rounded-3xl border border-yellow-100 space-y-2 shadow-sm">
-            <label class="font-bold text-yellow-800">📝 หมายเหตุ / วิธีทำ <span class="text-xs font-normal text-yellow-600">(แสดงในใบสูตร)</span></label>
-            <textarea id="formRemark" class="w-full rounded-2xl px-6 py-4 border border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-400" rows="3" placeholder="พิมพ์ข้อความหมายเหตุ หรือขั้นตอนการทำที่นี่..."></textarea>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-yellow-50 p-6 rounded-3xl border border-yellow-100 space-y-2 shadow-sm">
+              <label class="font-bold text-yellow-800">📝 หมายเหตุ / วิธีทำ <span class="text-xs font-normal text-yellow-600">(แสดงในใบสูตร)</span></label>
+              <textarea id="formRemark" class="w-full rounded-2xl px-6 py-4 border border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-400" rows="3" placeholder="พิมพ์ข้อความหมายเหตุ หรือขั้นตอนการทำที่นี่..."></textarea>
+            </div>
+            <div class="bg-amber-50 p-6 rounded-3xl border border-amber-100 space-y-2 shadow-sm">
+              <label class="font-bold text-amber-800">🍯 หมายเหตุความหวาน <span class="text-xs font-normal text-amber-600">(แสดงในใบสูตร)</span></label>
+              <textarea id="formSweetRemark" class="w-full rounded-2xl px-6 py-4 border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400" rows="3" placeholder="พิมพ์ข้อมูลระดับความหวาน หรือสัดส่วนน้ำเชื่อมที่นี่..."></textarea>
+            </div>
           </div>
 
           <button onclick="saveItem()" id="btnSave" class="w-full py-5 rounded-2xl bg-green-600 text-white font-bold text-xl shadow-lg hover:bg-green-700">💾 บันทึกเมนู</button>
         </div>
       </div>
 
- <div id="viewIngredients" class="hidden w-full space-y-6 anim-slide">
+      <div id="viewIngredients" class="hidden w-full space-y-6 anim-slide">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <h2 class="text-2xl font-bold text-green-700 font-heading">📦 คลังวัตถุดิบ</h2>
           <div class="flex w-full md:w-auto gap-2">
@@ -224,10 +229,9 @@
               <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
               <input type="text" onkeyup="renderIngredientsList(this.value)" placeholder="ค้นหาวัตถุดิบ..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
             </div>
-            <button onclick="toggleIngForm()" id="btnToggleIng" class="bg-green-600 text-white px-5 py-2 rounded-full font-bold shadow-md hover:bg-green-700 whitespace-nowrap">+ เพิ่ม</button>
+            <button onclick="toggleIngForm()" id="btnToggleIng" class="bg-green-600 text-white px-5 py-2 rounded-full font-bold shadow-md hover:bg-green-700 whitespace-nowrap">+ เพิ่มเข้าคลัง</button>
           </div>
         </div>
-   
         <div id="ingFormContainer" class="hidden bg-white p-8 rounded-3xl border border-green-100 shadow-xl space-y-4">
           <h3 id="ingFormTitle" class="font-bold text-green-700">เพิ่มวัตถุดิบใหม่</h3>
           <input id="ingName" type="text" placeholder="ชื่อวัตถุดิบ" class="w-full rounded-2xl px-6 py-4">
@@ -326,24 +330,34 @@
       lucide.createIcons();
     }
 
- // เพิ่มตัวแปร f = '' สำหรับรับคำค้นหา และใส่ฟิลเตอร์ .filter()
     function renderIngredientsList(f = '') {
       const s = [...allIngredients]
         .sort((a,b) => a.name.localeCompare(b.name, 'th'))
-        .filter(i => i.name.toLowerCase().includes(f.toLowerCase())); // กรองคำค้นหา
-        
+        .filter(i => i.name.toLowerCase().includes(f.toLowerCase()));
       document.getElementById('ingredientTableBody').innerHTML = s.map(i => `<tr><td class="text-left px-8 font-bold">${i.name}</td><td class="text-blue-500 font-bold">${i.quantity} <span class="text-[10px] opacity-30">${i.unit}</span></td><td class="text-green-600 font-bold">฿${parseFloat(i.price).toFixed(3)}</td><td><button onclick="editIng('${i.__backendId}')" class="p-2 bg-slate-100 text-slate-500 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button></td><td><button onclick="deleteIngredient('${i.__backendId}')" class="p-2 text-red-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
-      
       lucide.createIcons();
     }
 
     function showRecipeDetail(id) {
       const item = allData.find(d => d.__backendId == id), data = JSON.parse(item.ingredients);
-      const remarkHtml = data.remark ? `
-        <div class="mt-8 bg-yellow-50 p-6 rounded-3xl border border-yellow-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none">
-            <h3 class="text-lg font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-2 print:text-black print:border-black">📝 หมายเหตุ / วิธีทำ</h3>
-            <p class="text-sm text-yellow-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.remark}</p>
-        </div>` : '';
+      
+      // 📝 โค้ดใหม่: แสดงกล่องหมายเหตุคู่กัน ซ้าย-ขวา ตอนเปิดดูและตอนพิมพ์ใบสูตร
+      let remarksHtml = '';
+      if (data.remark || data.sweetRemark) {
+        remarksHtml = `
+          <div class="mt-8 flex flex-col md:flex-row gap-4 print:flex-row print:w-full">
+            ${data.remark ? `
+              <div class="flex-1 bg-yellow-50 p-6 rounded-3xl border border-yellow-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none print:w-1/2">
+                  <h3 class="text-lg font-bold text-yellow-800 mb-2 border-b border-yellow-200 pb-2 print:text-black print:border-black">📝 หมายเหตุ / วิธีทำ</h3>
+                  <p class="text-sm text-yellow-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.remark}</p>
+              </div>` : ''}
+            ${data.sweetRemark ? `
+              <div class="flex-1 bg-amber-50 p-6 rounded-3xl border border-amber-200 shadow-sm print:bg-transparent print:border-dashed print:border-gray-300 print:shadow-none print:w-1/2">
+                  <h3 class="text-lg font-bold text-amber-800 mb-2 border-b border-amber-200 pb-2 print:text-black print:border-black">🍯 หมายเหตุความหวาน</h3>
+                  <p class="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed print:text-black">${data.sweetRemark}</p>
+              </div>` : ''}
+          </div>`;
+      }
 
       document.getElementById('recipeDetailContent').innerHTML = `
         <div class="text-center mb-8">
@@ -364,7 +378,7 @@
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
             ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n} <span class="text-[10px] text-slate-400">${e.q ? `(${e.q} ${e.u})` : ''}</span></span><span>฿${(parseFloat(e.q || 1) * parseFloat(e.p || 0)).toFixed(2)}</span></div>`).join('')}
         </div>
-        ${remarkHtml}
+        ${remarksHtml}
         <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
         <div class="mt-1 text-center opacity-30 text-[10px] hidden print:block">พัฒนาระบบ โดย เฟรมเอง</div>`;
       document.getElementById('recipeModal').classList.remove('hidden'); document.getElementById('recipeModal').classList.add('flex');
@@ -376,6 +390,7 @@
       document.getElementById('formName').value = '';
       document.getElementById('formSellingPrice').value = '';
       document.getElementById('formRemark').value = '';
+      document.getElementById('formSweetRemark').value = ''; // เคลียร์หมายเหตุความหวาน
       document.getElementById('ingredientsList').innerHTML = '';
       document.getElementById('extraCostsList').innerHTML = '';
       recalcForm();
@@ -386,6 +401,7 @@
       document.getElementById('formName').value = '';
       document.getElementById('formSellingPrice').value = '';
       document.getElementById('formRemark').value = '';
+      document.getElementById('formSweetRemark').value = ''; // เคลียร์หมายเหตุความหวาน
       document.getElementById('ingredientsList').innerHTML = '';
       document.getElementById('extraCostsList').innerHTML = '';
       editingId = null;
@@ -403,9 +419,14 @@
       try { 
         const d = JSON.parse(item.ingredients); 
         document.getElementById('formRemark').value = d.remark || '';
+        document.getElementById('formSweetRemark').value = d.sweetRemark || ''; // ดึงข้อมูลหมายเหตุความหวาน
         (d.ings || []).forEach(i => addIngredientRow(i.n, i.q, i.u, i.p)); 
         (d.exts || []).forEach(e => addExtraCostRow(e.n, e.q || 1, e.u || '-', e.p));
-      } catch(e) { addIngredientRow(); document.getElementById('formRemark').value = ''; } 
+      } catch(e) { 
+        addIngredientRow(); 
+        document.getElementById('formRemark').value = ''; 
+        document.getElementById('formSweetRemark').value = ''; 
+      } 
       recalcForm();
     }
 
@@ -515,8 +536,9 @@
       const t = ings.reduce((s, i) => s + (parseFloat(i.q || 0) * parseFloat(i.p || 0)), 0) + exts.reduce((s, e) => s + (parseFloat(e.q || 0) * parseFloat(e.p || 0)), 0);
       const sell = parseFloat(document.getElementById('formSellingPrice').value) || 0;
       const remark = document.getElementById('formRemark').value;
+      const sweetRemark = document.getElementById('formSweetRemark').value; // บันทึกหมายเหตุความหวานเพิ่ม
 
-      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ ings, exts, remark }), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0, created_at: new Date().toISOString() } };
+      const payload = { action: 'saveData', type: 'item', record: { __backendId: editingId, item_name: name, category: document.getElementById('formCategory').value, ingredients: JSON.stringify({ ings, exts, remark, sweetRemark }), total_cost: t, selling_price: sell, profit: sell - t, margin_percent: sell > 0 ? (((sell - t) / sell) * 100) : 0, created_at: new Date().toISOString() } };
       fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }).then(res => res.json()).then(() => {
         showToast('บันทึกสำเร็จ'); refreshData(); openAddMenuForm(); switchView('list');
       });
