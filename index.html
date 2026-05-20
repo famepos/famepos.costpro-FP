@@ -216,11 +216,18 @@
         </div>
       </div>
 
-      <div id="viewIngredients" class="hidden w-full space-y-6 anim-slide">
-        <div class="flex justify-between items-center w-full">
+ <div id="viewIngredients" class="hidden w-full space-y-6 anim-slide">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
           <h2 class="text-2xl font-bold text-green-700 font-heading">📦 คลังวัตถุดิบ</h2>
-          <button onclick="toggleIngForm()" id="btnToggleIng" class="bg-green-600 text-white px-6 py-3 rounded-2xl font-bold shadow-md hover:bg-green-700">+ เพิ่มเข้าคลัง</button>
+          <div class="flex w-full md:w-auto gap-2">
+            <div class="relative w-full md:w-64">
+              <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              <input type="text" onkeyup="renderIngredientsList(this.value)" placeholder="ค้นหาวัตถุดิบ..." class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+            </div>
+            <button onclick="toggleIngForm()" id="btnToggleIng" class="bg-green-600 text-white px-5 py-2 rounded-full font-bold shadow-md hover:bg-green-700 whitespace-nowrap">+ เพิ่ม</button>
+          </div>
         </div>
+   
         <div id="ingFormContainer" class="hidden bg-white p-8 rounded-3xl border border-green-100 shadow-xl space-y-4">
           <h3 id="ingFormTitle" class="font-bold text-green-700">เพิ่มวัตถุดิบใหม่</h3>
           <input id="ingName" type="text" placeholder="ชื่อวัตถุดิบ" class="w-full rounded-2xl px-6 py-4">
@@ -319,9 +326,14 @@
       lucide.createIcons();
     }
 
-    function renderIngredientsList() {
-      const s = [...allIngredients].sort((a,b) => a.name.localeCompare(b.name, 'th'));
+ // เพิ่มตัวแปร f = '' สำหรับรับคำค้นหา และใส่ฟิลเตอร์ .filter()
+    function renderIngredientsList(f = '') {
+      const s = [...allIngredients]
+        .sort((a,b) => a.name.localeCompare(b.name, 'th'))
+        .filter(i => i.name.toLowerCase().includes(f.toLowerCase())); // กรองคำค้นหา
+        
       document.getElementById('ingredientTableBody').innerHTML = s.map(i => `<tr><td class="text-left px-8 font-bold">${i.name}</td><td class="text-blue-500 font-bold">${i.quantity} <span class="text-[10px] opacity-30">${i.unit}</span></td><td class="text-green-600 font-bold">฿${parseFloat(i.price).toFixed(3)}</td><td><button onclick="editIng('${i.__backendId}')" class="p-2 bg-slate-100 text-slate-500 rounded-lg"><i data-lucide="pencil" class="w-4 h-4"></i></button></td><td><button onclick="deleteIngredient('${i.__backendId}')" class="p-2 text-red-300"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td></tr>`).join('');
+      
       lucide.createIcons();
     }
 
