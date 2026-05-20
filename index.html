@@ -47,6 +47,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
   <style>
     tailwind.config = {
@@ -502,22 +503,22 @@
 function addIngredientRow(n='', q='', u='', p='') {
       const rowId = 'row_' + Math.random().toString(36).substr(2, 9);
       const div = document.createElement('div');
-      div.className = 'ingredient-row grid grid-cols-12 gap-1 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; 
+      div.className = 'ingredient-row grid grid-cols-12 gap-1 items-center bg-white p-2 rounded-2xl border mb-2 shadow-sm'; 
       div.id = rowId;
       div.innerHTML = `
-      <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectIng(this, '${rowId}')" placeholder="ค้นหาวัตถุดิบ..." class="w-full bg-slate-50 text-xs p-3 rounded-xl border-none"></div>
-      <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
+      <div class="col-span-1 flex justify-center items-center cursor-grab drag-handle active:cursor-grabbing text-slate-300 hover:text-green-600">
+        <i data-lucide="grip-vertical" class="w-5 h-5"></i>
+      </div>
+      <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectIng(this, '${rowId}')" placeholder="ค้นหาวัตถุดิบ..." class="w-full bg-slate-50 text-xs p-2 md:p-3 rounded-xl border-none"></div>
+      <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-[10px] md:text-xs text-center border-none p-2 md:p-3 rounded-xl"></div>
       <div class="col-span-3 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-green-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
-      
-      <div class="col-span-2 flex justify-end items-center pr-1">
-        <div class="flex flex-col border-r pr-2 mr-2 border-slate-200">
-          <button onclick="moveRowUp('${rowId}')" class="text-slate-300 hover:text-green-600 text-[10px] leading-none pb-1" title="เลื่อนขึ้น">▲</button>
-          <button onclick="moveRowDown('${rowId}')" class="text-slate-300 hover:text-green-600 text-[10px] leading-none pt-1" title="เลื่อนลง">▼</button>
-        </div>
+      <div class="col-span-1 flex justify-end items-center pr-1">
         <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="text-slate-300 hover:text-red-500 font-bold text-2xl leading-none" title="ลบ">×</button>
       </div>`;
       document.getElementById('ingredientsList').appendChild(div);
+      lucide.createIcons(); // วาดไอคอน
     }
+
     function onSelectIng(input, rowId) { 
       const ing = allIngredients.find( i => i.name === input.value );
       if (ing) { 
@@ -528,21 +529,20 @@ function addIngredientRow(n='', q='', u='', p='') {
 function addExtraCostRow(n='', q='', u='', p='') {
       const rowId = 'ext_' + Math.random().toString(36).substr(2, 9);
       const div = document.createElement('div');
-      div.className = 'grid grid-cols-12 gap-1 items-center bg-white p-3 rounded-2xl border mb-2 shadow-sm'; 
+      div.className = 'grid grid-cols-12 gap-1 items-center bg-white p-2 rounded-2xl border mb-2 shadow-sm'; 
       div.id = rowId;
       div.innerHTML = `
-        <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectExtra(this, '${rowId}')" placeholder="ค้นหาต้นทุน..." class="w-full bg-slate-50 text-xs p-3 border-none rounded-xl"></div>
-        <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-xs text-center border-none p-3 rounded-xl"></div>
+        <div class="col-span-1 flex justify-center items-center cursor-grab drag-handle active:cursor-grabbing text-slate-300 hover:text-blue-600">
+          <i data-lucide="grip-vertical" class="w-5 h-5"></i>
+        </div>
+        <div class="col-span-5"><input list="ingredientsData" value="${n}" onchange="onSelectExtra(this, '${rowId}')" placeholder="ค้นหาต้นทุน..." class="w-full bg-slate-50 text-xs p-2 md:p-3 border-none rounded-xl"></div>
+        <div class="col-span-2"><input type="number" value="${q}" oninput="recalcForm()" placeholder="ใช้" class="w-full bg-slate-50 text-[10px] md:text-xs text-center border-none p-2 md:p-3 rounded-xl"></div>
         <div class="col-span-3 text-right"><span class="text-[9px] u">${u || '-'}</span><br><span class="text-[9px] text-blue-600 font-bold p">฿${p ? parseFloat(p).toFixed(3) : '0.00'}</span><input type="hidden" value="${p || 0}"></div>
-        
-        <div class="col-span-2 flex justify-end items-center pr-1">
-          <div class="flex flex-col border-r pr-2 mr-2 border-slate-200">
-            <button onclick="moveRowUp('${rowId}')" class="text-slate-300 hover:text-blue-600 text-[10px] leading-none pb-1" title="เลื่อนขึ้น">▲</button>
-            <button onclick="moveRowDown('${rowId}')" class="text-slate-300 hover:text-blue-600 text-[10px] leading-none pt-1" title="เลื่อนลง">▼</button>
-          </div>
+        <div class="col-span-1 flex justify-end items-center pr-1">
           <button onclick="document.getElementById('${rowId}').remove();recalcForm();" class="text-slate-300 hover:text-red-500 font-bold text-2xl leading-none" title="ลบ">×</button>
         </div>`;
       document.getElementById('extraCostsList').appendChild(div);
+      lucide.createIcons(); // วาดไอคอน
     }
 
     function onSelectExtra(input, rowId) {
@@ -609,9 +609,23 @@ function addExtraCostRow(n='', q='', u='', p='') {
       });
     }
 
-    document.addEventListener('DOMContentLoaded', () => { 
+  document.addEventListener('DOMContentLoaded', () => { 
       refreshData(); 
       UNITS.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; document.getElementById('ingUnit').appendChild(o); }); 
+      
+      // เปิดใช้งานระบบลาก-วาง สำหรับวัตถุดิบ
+      Sortable.create(document.getElementById('ingredientsList'), {
+        handle: '.drag-handle', // กำหนดให้จับลากได้เฉพาะตรงไอคอน
+        animation: 150, // ความสมูทตอนสลับที่
+        ghostClass: 'opacity-50' // ทำให้โปร่งใสตอนกำลังลาก
+      });
+
+      // เปิดใช้งานระบบลาก-วาง สำหรับต้นทุนแฝง
+      Sortable.create(document.getElementById('extraCostsList'), {
+        handle: '.drag-handle', 
+        animation: 150,
+        ghostClass: 'opacity-50'
+      });
     });
   </script>
   <datalist id="ingredientsData"></datalist>
