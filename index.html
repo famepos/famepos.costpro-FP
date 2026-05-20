@@ -341,7 +341,7 @@
     function showRecipeDetail(id) {
       const item = allData.find(d => d.__backendId == id), data = JSON.parse(item.ingredients);
       
-      // 📝 โค้ดใหม่: แสดงกล่องหมายเหตุคู่กัน ซ้าย-ขวา ตอนเปิดดูและตอนพิมพ์ใบสูตร
+      // 📝 โค้ดหมายเหตุ ซ้าย-ขวา
       let remarksHtml = '';
       if (data.remark || data.sweetRemark) {
         remarksHtml = `
@@ -374,10 +374,14 @@
               ${(data.ings||[]).map(i => `<div class="flex justify-between py-2 border-b border-slate-100 text-xl text-black"><span>• ${i.n}</span><span class="font-bold">${i.q} ${i.u}</span></div>`).join('')}
             </div>
         </div>
+        
         <div class="no-print mt-10">
             <h3 class="text-xl font-bold text-blue-800 border-b pb-2">💡 ต้นทุนเพิ่มเติม</h3>
-            ${(data.exts||[]).map(e => `<div class="flex justify-between py-1 border-b border-slate-50"><span>- ${e.n} <span class="text-[10px] text-slate-400">${e.q ? `(${e.q} ${e.u})` : ''}</span></span><span>฿${(parseFloat(e.q || 1) * parseFloat(e.p || 0)).toFixed(2)}</span></div>`).join('')}
+            <div class="space-y-2 mt-2">
+              ${(data.exts||[]).map(e => `<div class="flex justify-between py-2 border-b border-slate-50 text-black"><span>- ${e.n}</span><span class="font-bold text-slate-600">${e.q ? `${e.q} ${e.u}` : ''}</span></div>`).join('')}
+            </div>
         </div>
+
         ${remarksHtml}
         <div class="mt-20 text-center opacity-30 text-[10px] hidden print:block">พิมพ์โดยแอป CostPro</div>
         <div class="mt-1 text-center opacity-30 text-[10px] hidden print:block">พัฒนาระบบ โดย เฟรมเอง</div>`;
